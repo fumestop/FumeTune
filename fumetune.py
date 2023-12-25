@@ -28,7 +28,7 @@ class FumeTune(commands.AutoShardedBot):
         self.log = logging.getLogger("FumeTune")
 
 
-intents = discord.Intents.all()
+intents = discord.Intents.default()
 bot = FumeTune(command_prefix=commands.when_mentioned_or("/"), intents=intents)
 
 bot.launch_time = datetime.utcnow()
