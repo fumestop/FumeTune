@@ -26,7 +26,7 @@ class Dev(commands.Cog):
             )
 
         try:
-            self.bot.load_extension(f"cogs.{extension}")
+            await self.bot.load_extension(f"cogs.{extension}")
 
         except commands.ExtensionNotFound:
             return await ctx.edit_original_response(
@@ -58,7 +58,7 @@ class Dev(commands.Cog):
             )
 
         try:
-            self.bot.unload_extension(f"cogs.{extension}")
+            await self.bot.unload_extension(f"cogs.{extension}")
 
         except commands.ExtensionNotLoaded:
             return await ctx.edit_original_response(

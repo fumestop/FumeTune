@@ -37,6 +37,7 @@ class Evaluate(commands.Cog):
             "discord": discord,
             "ctx": ctx,
             "bot": self.bot,
+            "self.bot": self.bot,
             "channel": ctx.channel,
             "user": ctx.user,
             "guild": ctx.guild,
@@ -90,7 +91,7 @@ class Evaluate(commands.Cog):
                 # noinspection PyUnresolvedReferences,PyArgumentList
                 ret = await func()
 
-        except:
+        except Exception as _:
             value = stdout.getvalue()
             await ctx.edit_original_response(
                 content=f"```py\n{value}{traceback.format_exc()}\n```"
@@ -98,12 +99,15 @@ class Evaluate(commands.Cog):
 
         else:
             value = stdout.getvalue()
+
             if ret is None:
                 if value:
                     try:
                         await ctx.edit_original_response(content=f"```py\n{value}\n```")
-                    except:
+
+                    except Exception as _:
                         paginated_text = paginate(value)
+
                         for page in paginated_text:
                             if page == paginated_text[-1]:
                                 await ctx.edit_original_response(
@@ -113,19 +117,25 @@ class Evaluate(commands.Cog):
                             await ctx.edit_original_response(
                                 content=f"```py\n{page}\n```"
                             )
+                else:
+                    await ctx.edit_original_response(content="\U00002705")
+
             else:
                 try:
                     await ctx.edit_original_response(
                         content=f"```py\n{value}{ret}\n```"
                     )
-                except:
+
+                except Exception as _:
                     paginated_text = paginate(f"{value}{ret}")
+
                     for page in paginated_text:
                         if page == paginated_text[-1]:
                             await ctx.edit_original_response(
                                 content=f"```py\n{page}\n```"
                             )
                             break
+
                         await ctx.edit_original_response(content=f"```py\n{page}\n```")
 
     @app_commands.command(name="exec")
@@ -146,8 +156,8 @@ class Evaluate(commands.Cog):
             stderr=subprocess.PIPE,
             timeout=60,
         )
-        stdout_value = proc.stdout.decode("utf-8") + proc.stderr.decode("utf-8")
 
+        stdout_value = proc.stdout.decode("utf-8") + proc.stderr.decode("utf-8")
         stdout_value = "\n".join(stdout_value.split("\n")[-10:])
 
         await ctx.edit_original_response(content="```sh\n" + stdout_value + "```")
