@@ -698,7 +698,7 @@ class Music(commands.Cog):
 
             for index, track in enumerate(tracks, 1):
                 embed.description += (
-                    f"**{index}.** **[{track.title}]({track.uri})** by *{track.author}*"
+                    f"**{index}.** **[{track.title}]({track.uri})** by *{track.author}* "
                     f"({parse_duration(track.length)})\n\n"
                 )
 
