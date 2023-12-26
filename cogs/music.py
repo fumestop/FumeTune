@@ -220,7 +220,7 @@ class PlaylistConfirm(discord.ui.View):
         if not player.playing:
             await player.do_next()
 
-        await self.ctx.edit_original_response(
+        return await self.ctx.edit_original_response(
             content="Enqueued! \U0001F44C", embed=None, view=None
         )
 
@@ -298,7 +298,7 @@ class TrackSelect(discord.ui.Select):
         if not player.playing:
             await player.do_next()
 
-        await self.ctx.edit_original_response(
+        return await self.ctx.edit_original_response(
             content="Enqueued! \U0001F44C", embed=None, view=None
         )
 
