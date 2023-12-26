@@ -201,12 +201,12 @@ class PlaylistConfirm(discord.ui.View):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer()
 
-        player: Player = cast(Player, ctx.guild.voice_client)
+        player: Player = cast(Player, self.ctx.guild.voice_client)
 
-        if not ctx.user.voice:
+        if not self.ctx.user.voice:
             await player.teardown()
 
-            return ctx.edit_original_response(
+            return self.ctx.edit_original_response(
                 content="You are not connected to a voice channel. "
                 "Please connect to a voice channel and try again.",
                 embed=None,
@@ -220,7 +220,7 @@ class PlaylistConfirm(discord.ui.View):
         if not player.playing:
             await player.do_next()
 
-        await ctx.edit_original_response(
+        await self.ctx.edit_original_response(
             content="Enqueued! \U0001F44C", embed=None, view=None
         )
 
@@ -278,12 +278,12 @@ class TrackSelect(discord.ui.Select):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer()
 
-        player: Player = cast(Player, ctx.guild.voice_client)
+        player: Player = cast(Player, self.ctx.guild.voice_client)
 
-        if not ctx.user.voice:
+        if not self.ctx.user.voice:
             await player.teardown()
 
-            return ctx.edit_original_response(
+            return self.ctx.edit_original_response(
                 content="You are not connected to a voice channel. "
                 "Please connect to a voice channel and try again.",
                 embed=None,
@@ -291,7 +291,7 @@ class TrackSelect(discord.ui.Select):
             )
 
         track = self.tracks[int(self.values[0]) - 1]
-        track.extras = {"requester_id": ctx.user.id}
+        track.extras = {"requester_id": self.ctx.user.id}
 
         await player.queue.put_wait(track)
 
@@ -698,7 +698,7 @@ class Music(commands.Cog):
 
             for index, track in enumerate(tracks, 1):
                 embed.description += (
-                    f"**{index}.** **[{track.title}]({track.uri})** "
+                    f"**{index}.** **[{track.title}]({track.uri})** by *{track.author}*"
                     f"({parse_duration(track.length)})\n\n"
                 )
 
