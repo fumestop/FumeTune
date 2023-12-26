@@ -14,7 +14,7 @@ with open("config.json") as json_file:
     token = data["bot_token"]
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     filename="logs/fumetune.log",
     filemode="w",
     format="%(asctime)s - [%(levelname)s] %(message)s",

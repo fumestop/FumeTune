@@ -593,7 +593,7 @@ class Music(commands.Cog):
         tracks: wavelink.Search = await wavelink.Playable.search(query.strip("<>"))
 
         if not tracks:
-            return ctx.edit_original_response(
+            return await ctx.edit_original_response(
                 content=f"No matches found for `{query}`!"
             )
 
@@ -654,7 +654,7 @@ class Music(commands.Cog):
         tracks: wavelink.Search = await wavelink.Playable.search(query.strip("<>"))
 
         if not tracks:
-            return ctx.edit_original_response(
+            return await ctx.edit_original_response(
                 content=f"No matches found for `{query}`!"
             )
 
