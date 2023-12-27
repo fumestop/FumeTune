@@ -18,7 +18,11 @@ with open("config.json") as json_file:
 
 
 class EvalModal(ui.Modal, title="Evaluate Code"):
-    code = ui.TextInput(label="Code", placeholder="The code to evaluate...", style=discord.TextStyle.paragraph)
+    code = ui.TextInput(
+        label="Code",
+        placeholder="The code to evaluate...",
+        style=discord.TextStyle.paragraph,
+    )
 
     bot: commands.AutoShardedBot = None
     interaction: discord.Interaction = None
@@ -100,7 +104,9 @@ class EvalModal(ui.Modal, title="Evaluate Code"):
             if ret is None:
                 if value:
                     try:
-                        await self.interaction.edit_original_response(content=f"```py\n{value}\n```")
+                        await self.interaction.edit_original_response(
+                            content=f"```py\n{value}\n```"
+                        )
 
                     except Exception as _:
                         paginated_text = paginate(value)
@@ -133,11 +139,17 @@ class EvalModal(ui.Modal, title="Evaluate Code"):
                             )
                             break
 
-                        await self.interaction.edit_original_response(content=f"```py\n{page}\n```")
+                        await self.interaction.edit_original_response(
+                            content=f"```py\n{page}\n```"
+                        )
 
 
 class ExecModal(ui.Modal, title="Execute Shell Commands"):
-    cmds = ui.TextInput(label="Code", placeholder="The command(s) to execute...", style=discord.TextStyle.paragraph)
+    cmds = ui.TextInput(
+        label="Code",
+        placeholder="The command(s) to execute...",
+        style=discord.TextStyle.paragraph,
+    )
 
     bot: commands.AutoShardedBot = None
     interaction: discord.Interaction = None
@@ -160,7 +172,9 @@ class ExecModal(ui.Modal, title="Execute Shell Commands"):
         stdout_value = proc.stdout.decode("utf-8") + proc.stderr.decode("utf-8")
         stdout_value = "\n".join(stdout_value.split("\n")[-25:])
 
-        await self.interaction.edit_original_response(content="```sh\n" + stdout_value + "```")
+        await self.interaction.edit_original_response(
+            content="```sh\n" + stdout_value + "```"
+        )
 
 
 class Evaluate(commands.Cog):
@@ -187,8 +201,7 @@ class Evaluate(commands.Cog):
 
         if res:
             return await ctx.followup.send(
-                content="Timeout! Please try again.",
-                ephemeral=True
+                content="Timeout! Please try again.", ephemeral=True
             )
 
     @app_commands.command(name="exec")
@@ -210,8 +223,7 @@ class Evaluate(commands.Cog):
 
         if res:
             return await ctx.followup.send(
-                content="Timeout! Please try again.",
-                ephemeral=True
+                content="Timeout! Please try again.", ephemeral=True
             )
 
 

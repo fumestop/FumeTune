@@ -1387,8 +1387,7 @@ class Music(commands.Cog):
 
             if res:
                 return await ctx.followup.send(
-                    content="Timeout! Please try again.",
-                    ephemeral=True
+                    content="Timeout! Please try again.", ephemeral=True
                 )
 
             try:
