@@ -163,6 +163,7 @@ cython_debug/
 lavalink/application.yml
 lavalink/Lavalink.jar
 lavalink/logs/*.log
+lavalink/logs/*.gz
 lavalink/plugins/*.jar
 logs/*.log
 config.json
