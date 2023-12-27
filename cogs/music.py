@@ -1344,6 +1344,8 @@ class Music(commands.Cog):
             )
 
         modal = FilterModal()
+        modal.timeout = 60
+
         filters: wavelink.Filters = player.filters
 
         if filter_type.value == "reset_all":
@@ -1384,8 +1386,9 @@ class Music(commands.Cog):
             res = await modal.wait()
 
             if res:
-                return await modal.interaction.edit_original_response(
-                    content="Timeout! Please try again."
+                return await ctx.followup.send(
+                    content="Timeout! Please try again.",
+                    ephemeral=True
                 )
 
             try:

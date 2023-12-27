@@ -16,7 +16,7 @@ class Dev(commands.Cog):
 
     @app_commands.command(name="load", description="Load an extension.")
     @app_commands.guilds(community_server_id)
-    async def _load(self, ctx: discord.Interaction, extension: str, sync: bool = False):
+    async def _load(self, ctx: discord.Interaction, extension: str):
         # noinspection PyUnresolvedReferences
         await ctx.response.defecr(thinking=True)
 
@@ -38,17 +38,11 @@ class Dev(commands.Cog):
                 content="Sorry, this extension is already loaded."
             )
 
-        if sync:
-            await self.bot.tree.sync()
-            await self.bot.tree.sync(guild=discord.Object(id=community_server_id))
-
         await ctx.edit_original_response(content="The extension has been loaded.")
 
     @app_commands.command(name="unload", description="Unload an extension.")
     @app_commands.guilds(community_server_id)
-    async def _unload(
-        self, ctx: discord.Interaction, extension: str, sync: bool = False
-    ):
+    async def _unload(self, ctx: discord.Interaction, extension: str):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
@@ -65,17 +59,11 @@ class Dev(commands.Cog):
                 content="Sorry, no such extension is loaded."
             )
 
-        if sync:
-            await self.bot.tree.sync()
-            await self.bot.tree.sync(guild=discord.Object(id=community_server_id))
-
         await ctx.edit_original_response(content="The extension has been unloaded.")
 
     @app_commands.command(name="reload")
     @app_commands.guilds(community_server_id)
-    async def _reload(
-        self, ctx: discord.Interaction, extension: str, sync: bool = False
-    ):
+    async def _reload(self, ctx: discord.Interaction, extension: str):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
@@ -92,11 +80,24 @@ class Dev(commands.Cog):
                 content="Sorry, no such extension is loaded."
             )
 
-        if sync:
-            await self.bot.tree.sync()
-            await self.bot.tree.sync(guild=discord.Object(id=community_server_id))
-
         await ctx.edit_original_response(content="The extension has been reloaded.")
+
+    @app_commands.command(name="sync")
+    @app_commands.guilds(community_server_id)
+    async def _sync(self, ctx: discord.Interaction):
+        # noinspection PyUnresolvedReferences
+        await ctx.response.defer(thinking=True)
+
+        if not await self.bot.is_owner(ctx.user):
+            return await ctx.edit_original_response(
+                content="This is an owner(s) only command!"
+            )
+
+        await self.bot.tree.sync()
+        await self.bot.tree.sync(guild=discord.Object(id=community_server_id))
+        self.bot.tree.copy_global_to(guild=discord.Object(id=community_server_id))
+
+        await ctx.edit_original_response(content="Synced.")
 
 
 async def setup(bot):
