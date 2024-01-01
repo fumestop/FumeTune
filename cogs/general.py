@@ -12,7 +12,7 @@ class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(name="ping", description="Returns the API and bot latency")
+    @app_commands.command(name="ping", description="Returns the API and bot latency.")
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     async def _ping(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
@@ -36,19 +36,19 @@ class General(commands.Cog):
 
         await ctx.edit_original_response(embed=embed)
 
-    @app_commands.command(name="web", description="Shows web resources about FumeStop.")
+    @app_commands.command(name="web", description="Shows web resources about FumeTune.")
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     async def _web(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label="Website", url="https://fumes.top/"))
+        view.add_item(discord.ui.Button(label="Website", url="https://fumes.top"))
         view.add_item(
             discord.ui.Button(label="Homepage", url="https://fumes.top/fumetune")
         )
         view.add_item(
-            discord.ui.Button(label="Twitter", url="https://twitter.com/fumestop")
+            discord.ui.Button(label="Twitter", url="https://x.com/fumestop")
         )
 
         await ctx.edit_original_response(
@@ -57,7 +57,7 @@ class General(commands.Cog):
         )
 
     @app_commands.command(
-        name="invite", description="Shows the link to invite the bot to your server."
+        name="invite", description="Shows the link to invite FumeTune to your server."
     )
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     async def _invite(self, ctx: discord.Interaction):
@@ -67,14 +67,8 @@ class General(commands.Cog):
         view = discord.ui.View()
         view.add_item(
             discord.ui.Button(
-                label="With Required Permissions (Customizable)",
+                label="Invite",
                 url="https://fumes.top/fumetune/invite",
-            )
-        )
-        view.add_item(
-            discord.ui.Button(
-                label="With Administrator Permissions",
-                url="https://fumes.top/fumetune/invite?admin=true",
             )
         )
 
@@ -83,7 +77,7 @@ class General(commands.Cog):
         )
 
     @app_commands.command(
-        name="vote", description="Shows the URL to vote for FumeStop on Top.GG!"
+        name="vote", description="Shows the URL to vote for FumeTune on Top.GG!"
     )
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     async def _vote(self, ctx: discord.Interaction):
@@ -92,7 +86,7 @@ class General(commands.Cog):
 
         view = discord.ui.View()
         view.add_item(
-            discord.ui.Button(label="Vote", url="https://top.gg/bot/123456789")
+            discord.ui.Button(label="Vote", url="https://fumes.top/fumetune/vote")
         )
 
         await ctx.edit_original_response(
@@ -111,7 +105,7 @@ class General(commands.Cog):
         view = discord.ui.View()
         view.add_item(
             discord.ui.Button(
-                label="Community Server Invite", url="https://fumes.top/community"
+                label="Join Community", url="https://fumes.top/community"
             )
         )
 
