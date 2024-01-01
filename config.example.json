@@ -1,6 +1,10 @@
 {
 
-    "bot_token"             : "bot-token",
+    "bot_token"             : "bot_token",
+
+    "secret_key"            : "secret_key",
+    "standard_port"         : 12345,
+    "multicast_port"        : 12345,
 
     "community_server_id"   : 123456789,
     "log_channel_id"        : 123456789,
@@ -21,6 +25,6 @@
         }
     ],
 
-    "topgg_token"           : "topgg_token",
+    "topgg_token"           : "topgg_token"
 
 }

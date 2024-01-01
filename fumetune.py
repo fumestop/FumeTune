@@ -30,6 +30,7 @@ class FumeTune(commands.AutoShardedBot):
 
 intents = discord.Intents.default()
 intents.presences = True
+intents.members = True
 
 bot = FumeTune(command_prefix=commands.when_mentioned_or("/"), intents=intents)
 
