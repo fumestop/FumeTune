@@ -45,14 +45,14 @@ class General(commands.Cog):
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label="Website", url="https://fumes.top"))
         view.add_item(
-            discord.ui.Button(label="Homepage", url="https://fumes.top/fumetune")
+            discord.ui.Button(label="Bot Homepage", url="https://fumes.top/fumetune")
         )
         view.add_item(
             discord.ui.Button(label="Twitter", url="https://x.com/fumestop")
         )
 
         await ctx.edit_original_response(
-            content="Here are the links to various FumeStop resources on the web:",
+            content="Here are the links to various FumeTune resources on the web:",
             view=view,
         )
 
@@ -90,7 +90,7 @@ class General(commands.Cog):
         )
 
         await ctx.edit_original_response(
-            content="Thank you for voting for me!", view=view
+            content="Thank you for choosing to vote for me!", view=view
         )
 
     @app_commands.command(
