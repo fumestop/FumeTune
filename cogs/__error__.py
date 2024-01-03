@@ -1,10 +1,11 @@
 import json
+import string
+import random
+import traceback
 
 import discord
 from discord import app_commands
 from discord.ext import commands
-
-from utils.tools import parse_cooldown
 
 
 class Error(commands.Cog):
@@ -25,23 +26,11 @@ class Error(commands.Cog):
             ctx: discord.Interaction,
             error: app_commands.AppCommandError,
         ):
-            command = ctx.command
+            if isinstance(error, app_commands.CheckFailure):
+                return
 
             if isinstance(error, app_commands.CommandOnCooldown):
-                if ctx.command.name == "lyrics":
-                    minutes, seconds = parse_cooldown(error.retry_after)
-
-                    # noinspection PyUnresolvedReferences
-                    message = (
-                        f"Sorry, you can use this command only **once an hour**. "
-                        f"Come back in **{minutes}** minutes and **{seconds}** seconds."
-                    )
-
-                else:
-                    message = f"You are on cooldown. Please try again in **{round(error.retry_after, 2)}** seconds."
-
-            elif isinstance(error, app_commands.CheckFailure):
-                message = str(error)
+                message = f"You are on cooldown. Please try again in **{round(error.retry_after, 2)}** seconds."
 
             else:
                 embed = discord.Embed(colour=self.bot.embed_colour)
@@ -59,9 +48,26 @@ class Error(commands.Cog):
 
                 embed.description = ""
 
-                embed.add_field(name="Command", value=f"`{command.name}`", inline=False)
                 embed.add_field(
-                    name="Exception", value=f"```css\n{error.__traceback__}```"
+                    name="Command", value=f"`{ctx.command.name}`", inline=False
+                )
+                embed.add_field(
+                    name="Server",
+                    value=f"**{ctx.guild.name}** `({ctx.guild.id})`",
+                    inline=False,
+                )
+
+                file_name = (
+                    f"logs/error-{ctx.guild.id}-{ctx.command.name}-"
+                    f"{''.join(random.choices(string.ascii_letters + string.digits, k=10))}.log"
+                )
+
+                with open(file_name, "w") as f:
+                    f.write("".join(traceback.format_exception(error)))
+
+                embed.add_field(
+                    name="Log",
+                    value=f"Saved to `{file_name}`",
                 )
 
                 channel = self.bot.get_channel(self.log_channel_id)

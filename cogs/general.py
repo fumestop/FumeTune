@@ -47,9 +47,7 @@ class General(commands.Cog):
         view.add_item(
             discord.ui.Button(label="Bot Homepage", url="https://fumes.top/fumetune")
         )
-        view.add_item(
-            discord.ui.Button(label="Twitter", url="https://x.com/fumestop")
-        )
+        view.add_item(discord.ui.Button(label="Twitter", url="https://x.com/fumestop"))
 
         await ctx.edit_original_response(
             content="Here are the links to various FumeTune resources on the web:",
@@ -104,9 +102,7 @@ class General(commands.Cog):
 
         view = discord.ui.View()
         view.add_item(
-            discord.ui.Button(
-                label="Join Community", url="https://fumes.top/community"
-            )
+            discord.ui.Button(label="Join Community", url="https://fumes.top/community")
         )
 
         await ctx.edit_original_response(
