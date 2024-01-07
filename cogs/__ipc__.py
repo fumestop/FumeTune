@@ -28,7 +28,6 @@ class IPC(commands.Cog):
 
     async def cog_unload(self):
         await self.bot.ipc.stop()
-        # self.bot.ipc = None
 
     # noinspection PyUnusedLocal
     @Server.route(name="get_guild_count")
@@ -43,37 +42,8 @@ class IPC(commands.Cog):
     # noinspection PyUnusedLocal
     @Server.route(name="get_command_count")
     async def _get_command_count(self, data: ClientPayload):
-        cmds = await self.bot.tree.fetch_commands()
-        return {"count": len(cmds)}
-
-    """
-    @Server.route(name="get_channel_list")
-    async def _get_channel_list(self, data: ClientPayload):
-        guild = self.bot.get_guild(data.guild_id)
-
-        if not guild:
-            return {"error": {"code": 404, "message": "Guild not found."}}
-
-        channels = list()
-
-        for channel in guild.text_channels:
-            if not channel.permissions_for(guild.me).send_messages:
-                continue
-
-            else:
-                channels.append({"id": channel.id, "name": channel.name})
-
-        return {"channels": channels}
-
-    @Server.route(name="get_mutual_guilds")
-    async def _get_mutual_guilds(self, data: ClientPayload):
-        user = self.bot.get_user(data.user_id)
-
-        if not user:
-            return {"error": {"code": 404, "message": "User not found."}}
-
-        return {"guilds": [guild.id for guild in user.mutual_guilds]}
-    """
+        _commands = await self.bot.tree.fetch_commands()
+        return {"count": len(_commands)}
 
 
 async def setup(bot):
