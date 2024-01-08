@@ -2,6 +2,8 @@
 
     "bot_token"             : "bot_token",
 
+    "embed_color"           : 12345,
+
     "secret_key"            : "secret_key",
     "standard_port"         : 12345,
     "multicast_port"        : 12345,
