@@ -25,7 +25,6 @@ async def guild_exists(guild_id: int):
 
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
-            # noinspection SqlResolve,SqlNoDataSourceInspection
             await cur.execute(
                 f"select GUILD_ID from guilds where GUILD_ID = %s;", (guild_id,)
             )
@@ -54,7 +53,6 @@ async def add_guild(guild_id: int):
 
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
-            # noinspection SqlResolve,SqlNoDataSourceInspection
             await cur.execute("insert into guilds (GUILD_ID) values (%s);", (guild_id,))
 
     pool.close()
@@ -74,7 +72,6 @@ async def is_premium_user(user_id: int):
 
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
-            # noinspection SqlResolve,SqlNoDataSourceInspection
             await cur.execute(
                 "select PREMIUM from users where USER_ID = %s;", (user_id,)
             )
@@ -103,7 +100,6 @@ async def is_premium_guild(user_id: int):
 
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
-            # noinspection SqlResolve,SqlNoDataSourceInspection
             await cur.execute(
                 "select PREMIUM from guilds where GUILD_ID = %s;", (user_id,)
             )
