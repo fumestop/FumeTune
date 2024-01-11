@@ -16,7 +16,7 @@ with open("config.json") as json_file:
 
 logging.basicConfig(
     level=logging.INFO,
-    filename=f"logs/fumeguard-{datetime.now().strftime('%Y-%m-%d~%H-%M-%S')}.log",
+    filename=f"logs/fumetune-{datetime.now().strftime('%Y-%m-%d~%H-%M-%S')}.log",
     filemode="w",
     format="%(asctime)s - [%(levelname)s] %(message)s",
 )
