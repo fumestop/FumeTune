@@ -25,7 +25,7 @@ class Help(commands.Cog):
 
         embed.add_field(
             name="General",
-            value=f"`ping`, `web`, `invite`, `vote`, `community`",
+            value=f"`ping`, `web`, `invite`, `vote`, `review`, `community`",
             inline=False,
         )
 

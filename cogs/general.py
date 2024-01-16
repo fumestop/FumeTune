@@ -65,7 +65,7 @@ class General(commands.Cog):
         )
 
     @app_commands.command(
-        name="invite", description="Shows the link to invite FumeTune to your server."
+        name="invite", description="Shows the invite link for FumeTune."
     )
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     async def _invite(self, ctx: discord.Interaction):
@@ -84,9 +84,7 @@ class General(commands.Cog):
             content="Thank you for choosing me!", view=view
         )
 
-    @app_commands.command(
-        name="vote", description="Shows the URL to vote for FumeTune on Top.GG!"
-    )
+    @app_commands.command(name="vote", description="Vote for FumeTune on Top.GG!")
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     async def _vote(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
@@ -99,6 +97,21 @@ class General(commands.Cog):
 
         await ctx.edit_original_response(
             content="Thank you for choosing to vote for me!", view=view
+        )
+
+    @app_commands.command(name="review", description="Review FumeTune on Top.GG!")
+    @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
+    async def _review(self, ctx: discord.Interaction):
+        # noinspection PyUnresolvedReferences
+        await ctx.response.defer(thinking=True)
+
+        view = discord.ui.View()
+        view.add_item(
+            discord.ui.Button(label="Review", url="https://fumes.top/fumetune/review")
+        )
+
+        await ctx.edit_original_response(
+            content="Thank you for reviewing me!", view=view
         )
 
     @app_commands.command(
