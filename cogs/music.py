@@ -1,5 +1,7 @@
 import math
 import json
+import string
+import random
 import asyncio
 import textwrap
 import collections
@@ -21,32 +23,6 @@ from utils.tools import (
     dynamic_cooldown_x,
     dynamic_cooldown_y,
 )
-
-
-def _music_cog_check(ctx: discord.Interaction):
-    if not ctx.user.voice or not ctx.user.voice.channel:
-        raise app_commands.CheckFailure("Please join a voice channel first.")
-
-    # noinspection PyUnresolvedReferences
-    player: Player = cast(Player, ctx.guild.voice_client)
-
-    if not player or not player.connected:
-        return True
-
-    if player.ctx and player.ctx.channel != ctx.channel:
-        raise app_commands.CheckFailure(
-            f"{ctx.user.mention}, you must be in {player.ctx.channel.mention} "
-            f"for this session."
-        )
-
-    if Music.is_privileged(ctx):
-        return True
-
-    if player.connected:
-        if ctx.user not in player.channel.members:
-            raise app_commands.CheckFailure(
-                f"You must be connected to `{player.channel.name}`."
-            )
 
 
 class Player(wavelink.Player):
@@ -82,6 +58,7 @@ class Player(wavelink.Player):
 
         try:
             self.waiting = True
+
             with async_timeout.timeout(300):
                 track = await self.queue.get_wait()
 
@@ -92,34 +69,35 @@ class Player(wavelink.Player):
 
         self.waiting = False
 
-        embed, view = self.build_source_details()
-        await self.ctx.channel.send(embed=embed, view=view)
+        embed, view = self.build_track_embed()
 
-    def build_source_details(self):
+        try:
+            await self.ctx.channel.send(embed=embed, view=view)
+
+        except (discord.Forbidden, discord.errors.Forbidden):
+            return
+
+    def build_track_embed(self):
         track = self.current
 
         channel = self.channel
 
         embed = discord.Embed(title=f"Now Playing | {channel.name}", colour=0xE44C65)
-        # noinspection PyUnresolvedReferences
         embed.description = f"```css\n{track.title}```\n\n"
 
         if track.artwork:
             embed.set_thumbnail(url=track.artwork)
 
-        # noinspection PyUnresolvedReferences
         embed.add_field(name="Author", value=track.author)
         embed.add_field(name="Duration", value=parse_duration(track.length))
         embed.add_field(name="Queue Length", value=len(self.queue))
         embed.add_field(name="Volume", value=f"**`{self.volume}%`**")
-        # noinspection PyUnresolvedReferences
         embed.add_field(
             name="Requested By",
             value=self.ctx.guild.get_member(track.extras.requester_id).mention,
         )
 
         view = discord.ui.View()
-        # noinspection PyUnresolvedReferences
         view.add_item(discord.ui.Button(label="Video Link", url=track.uri))
 
         return embed, view
@@ -140,7 +118,6 @@ class QueuePaginatorSource(ListPageSource):
         channel = player.channel
 
         embed = discord.Embed(title=f"Queue | {channel.name}", colour=0xE44C65)
-        # noinspection PyProtectedMember
         embed.description = "\n".join(
             f"`{index}`. **[{track.title}]({track.uri})** "
             f"({parse_duration(track.length)} - "
@@ -306,6 +283,12 @@ class TrackSelect(discord.ui.Select):
 class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+        with open("config.json") as f:
+            data = json.load(f)
+
+        self.log_channel_id = data["log_channel_id"]
+
         self.bot.loop.create_task(self.connect_nodes())
 
     async def connect_nodes(self):
@@ -313,11 +296,10 @@ class Music(commands.Cog):
 
         with open("config.json") as f:
             data = json.load(f)
-            _nodes = data["nodes"]
 
         nodes = list()
 
-        for node in _nodes:
+        for node in data["nodes"]:
             nodes.append(
                 wavelink.Node(
                     identifier=node["identifier"],
@@ -343,6 +325,41 @@ class Music(commands.Cog):
 
         await player.do_next()
 
+        await player.channel.send(
+            content="The song encountered an error, **it is being skipped.**"
+        )
+
+        embed = discord.Embed(colour=self.bot.embed_colour)
+        embed.description = ""
+
+        embed.add_field(name="Track", value=f"`{payload.track.title}`", inline=False)
+
+        # noinspection PyUnresolvedReferences
+        exception = {
+            "title": payload.track.title,
+            "source": payload.track.source,
+            "severity": payload.exception.severity,
+            "cause": payload.exception.cause,
+            "message": payload.exception.message,
+        }
+
+        file_name = (
+            f"logs/tracks/{payload.track.identifier}"
+            f"{''.join(random.choices(string.ascii_letters + string.digits, k=10))}.log"
+        )
+
+        with open(file_name, "w") as f:
+            json.dump(exception, f, indent=4)
+
+        embed.add_field(
+            name="Log",
+            value=f"Saved to `{file_name}`",
+        )
+
+        channel = self.bot.get_channel(self.log_channel_id)
+
+        return await channel.send(embed=embed)
+
     @commands.Cog.listener()
     async def on_wavelink_track_stuck(self, payload: wavelink.TrackStuckEventPayload):
         player: Player | None = payload.player
@@ -350,7 +367,13 @@ class Music(commands.Cog):
         if not player:
             return
 
+        # noinspection PyProtectedMember
+        player.queue._queue.insert(0, payload.track)
         await player.do_next()
+
+        await player.channel.send(
+            content="The song got stuck, **it is being replayed.**"
+        )
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, payload: wavelink.TrackEndEventPayload):
@@ -402,6 +425,71 @@ class Music(commands.Cog):
 
         elif after.channel == channel and player.dj not in channel.members:
             player.dj = member
+
+    @staticmethod
+    async def _playable_checks(ctx: discord.Interaction):
+        # noinspection PyUnresolvedReferences
+        await ctx.response.defer(thinking=True)
+
+        player: Player = cast(Player, ctx.guild.voice_client)
+
+        if not player:
+            channel = ctx.user.voice.channel
+
+            if (
+                not channel.permissions_for(ctx.guild.me).connect
+                or not channel.permissions_for(ctx.guild.me).speak
+            ):
+                raise app_commands.CheckFailure(
+                    "Sorry, I do not have permissions to `Connect` and/or `Speak` in that voice channel."
+                )
+
+            if channel.user_limit and len(channel.members) == channel.user_limit:
+                raise app_commands.CheckFailure("Sorry, that voice channel is full.")
+
+            if not ctx.channel.permissions_for(ctx.guild.me).send_messages:
+                raise app_commands.CheckFailure(
+                    "Sorry, I do not have permissions to send messages in this channel."
+                )
+
+            pl = Player(ctx=ctx)
+
+            try:
+                _: Player = await channel.connect(cls=pl, timeout=10.0)
+
+            except wavelink.exceptions.ChannelTimeoutException:
+                raise app_commands.CheckFailure(
+                    "I was unable to connect to that voice channel."
+                )
+
+        return True
+
+    @staticmethod
+    def _initial_checks(ctx: discord.Interaction):
+        if not ctx.user.voice or not ctx.user.voice.channel:
+            raise app_commands.CheckFailure("Please join a voice channel first.")
+
+        player: Player = cast(Player, ctx.guild.voice_client)
+
+        if not player or not player.connected:
+            return True
+
+        if player.ctx and player.ctx.channel != ctx.channel:
+            raise app_commands.CheckFailure(
+                f"{ctx.user.mention}, you must be in {player.ctx.channel.mention} "
+                f"for this session."
+            )
+
+        if Music.is_privileged(ctx):
+            return True
+
+        if player.connected:
+            if ctx.user not in player.channel.members:
+                raise app_commands.CheckFailure(
+                    f"You must be connected to `{player.channel.name}`."
+                )
+
+        return True
 
     @staticmethod
     def required(ctx: discord.Interaction):
@@ -545,14 +633,18 @@ class Music(commands.Cog):
                 content="Sorry, that voice channel is full."
             )
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player:
             pl = Player(ctx=ctx)
 
-            # noinspection PyUnusedLocal, PyTypeChecker
-            player: Player = await channel.connect(cls=pl)
+            try:
+                _: Player = await channel.connect(cls=pl)
+
+            except wavelink.exceptions.ChannelTimeoutException:
+                return await ctx.edit_original_response(
+                    content="I was unable to connect to that voice channel."
+                )
 
         else:
             await player.move_to(channel)
@@ -560,35 +652,12 @@ class Music(commands.Cog):
         await ctx.edit_original_response(content=f"Connected to **{channel.name}**.")
 
     @app_commands.command(name="play", description="Play a song.")
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
+    @app_commands.check(_playable_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
-    async def _play(self, ctx: discord.Interaction, *, query: str):
-        # noinspection PyUnresolvedReferences
-        await ctx.response.defer(thinking=True)
-
-        # noinspection PyTypeChecker
+    async def _play(self, ctx: discord.Interaction, query: str):
         player: Player = cast(Player, ctx.guild.voice_client)
-
-        if not player:
-            channel = ctx.user.voice.channel
-
-            if (
-                not channel.permissions_for(ctx.guild.me).connect
-                or not channel.permissions_for(ctx.guild.me).speak
-            ):
-                await ctx.edit_original_response(
-                    content="Sorry, I do not have permissions to `Connect` and/or `Speak` "
-                    "in that voice channel."
-                )
-
-            if channel.user_limit and len(channel.members) == channel.user_limit:
-                await ctx.edit_original_response(
-                    content="Sorry, that voice channel is full."
-                )
-
-            pl = Player(ctx=ctx)
-            player: Player = await channel.connect(cls=pl)
 
         tracks: wavelink.Search = await wavelink.Playable.search(query.strip("<>"))
 
@@ -613,16 +682,13 @@ class Music(commands.Cog):
         await ctx.edit_original_response(content="Enqueued! \U0001F44C")
 
     @app_commands.command(
-        name="search", description="Search for a song / playlist and play / queue it."
+        name="search", description="Search for a song/playlist and play/queue it."
     )
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
+    @app_commands.check(_playable_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _search(self, ctx: discord.Interaction, query: str):
-        # noinspection PyUnresolvedReferences
-        await ctx.response.defer(thinking=True)
-
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player:
@@ -644,8 +710,13 @@ class Music(commands.Cog):
 
             pl = Player(ctx=ctx)
 
-            # noinspection PyTypeChecker,PyUnusedLocal
-            player: Player = await channel.connect(cls=pl)
+            try:
+                _: Player = await channel.connect(cls=pl)
+
+            except wavelink.exceptions.ChannelTimeoutException:
+                return await ctx.edit_original_response(
+                    content="I was unable to connect to that voice channel."
+                )
 
         query = query.strip("<>")
 
@@ -723,14 +794,13 @@ class Music(commands.Cog):
     @app_commands.commands.command(
         name="pause", description="Pause the currently playing song."
     )
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _pause(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -770,14 +840,13 @@ class Music(commands.Cog):
     @app_commands.command(
         name="resume", description="Resume the currently playing song."
     )
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _resume(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -816,14 +885,13 @@ class Music(commands.Cog):
         name="seek",
         description="Seek to a specific time in the currently-playing song.",
     )
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _seek(self, ctx: discord.Interaction, position: int = 0):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -846,14 +914,13 @@ class Music(commands.Cog):
         await ctx.edit_original_response(content=f"The player has been seeked.")
 
     @app_commands.command(name="skip", description="Skip the currently playing song.")
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _skip(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -895,14 +962,13 @@ class Music(commands.Cog):
             )
 
     @app_commands.command(name="flush", description="Flush the queue.")
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _flush(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -926,14 +992,13 @@ class Music(commands.Cog):
             )
 
     @app_commands.command(name="stop", description="Stop the player.")
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _stop(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -966,14 +1031,13 @@ class Music(commands.Cog):
     @app_commands.command(
         name="remove", description='Remove a song from the queue by it"s index.'
     )
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _remove(self, ctx: discord.Interaction, index: int):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -993,14 +1057,13 @@ class Music(commands.Cog):
             )
 
     @app_commands.command(name="disconnect", description="Disconnect the player.")
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _disconnect(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -1021,14 +1084,13 @@ class Music(commands.Cog):
             )
 
     @app_commands.command(name="volume", description="Set the volume of the player.")
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _volume(self, ctx: discord.Interaction, volume: int = 100):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -1052,14 +1114,13 @@ class Music(commands.Cog):
         )
 
     @app_commands.command(name="shuffle", description="Shuffle the queue.")
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _shuffle(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -1098,7 +1159,7 @@ class Music(commands.Cog):
     @app_commands.command(
         name="equalizer", description="Set the equalizer of the player."
     )
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     @app_commands.choices(
@@ -1116,7 +1177,6 @@ class Music(commands.Cog):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -1223,7 +1283,7 @@ class Music(commands.Cog):
     @app_commands.command(
         name="channel_mix", description="Set the channel_mix filter for the player."
     )
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     @app_commands.choices(
@@ -1243,7 +1303,6 @@ class Music(commands.Cog):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -1310,7 +1369,7 @@ class Music(commands.Cog):
         description="Set the filter of the player, "
         "other than equaliser and channel_mix.",
     )
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     @app_commands.choices(
@@ -1328,7 +1387,6 @@ class Music(commands.Cog):
     async def _filter(
         self, ctx: discord.Interaction, filter_type: app_commands.Choice[str]
     ):
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.playing:
@@ -1635,14 +1693,13 @@ class Music(commands.Cog):
         )
 
     @app_commands.command(name="queue", description="View the queue.")
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _queue(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -1668,14 +1725,13 @@ class Music(commands.Cog):
         await paginator.start(ctx)
 
     @app_commands.command(name="np", description="Show the currently playing song.")
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _np(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -1683,7 +1739,7 @@ class Music(commands.Cog):
                 content="I am not playing any songs in this server right now."
             )
 
-        embed, view = player.build_source_details()
+        embed, view = player.build_track_embed()
 
         embed.set_field_at(
             0,
@@ -1696,14 +1752,13 @@ class Music(commands.Cog):
         await ctx.edit_original_response(embed=embed, view=view)
 
     @app_commands.command(name="loop", description="Loop the currently playing song.")
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _loop(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -1725,14 +1780,13 @@ class Music(commands.Cog):
             return await ctx.edit_original_response(content="Loop removed!")
 
     @app_commands.command(name="loop_queue", description="Loop the queue.")
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _loop_queue(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
@@ -1765,14 +1819,13 @@ class Music(commands.Cog):
         description="A shortcut to seek to the beginning of "
         "the currently playing song.",
     )
-    @app_commands.check(_music_cog_check)
+    @app_commands.check(_initial_checks)
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _replay(self, ctx: discord.Interaction):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        # noinspection PyTypeChecker
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player or not player.connected:
