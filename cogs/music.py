@@ -427,9 +427,6 @@ class Music(commands.Cog):
 
     @staticmethod
     async def _playable_checks(ctx: discord.Interaction):
-        # noinspection PyUnresolvedReferences
-        await ctx.response.defer(thinking=True)
-
         player: Player = cast(Player, ctx.guild.voice_client)
 
         if not player:
