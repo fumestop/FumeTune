@@ -27,8 +27,8 @@ class Core(commands.Cog):
         self.status_items = cycle(
             [
                 f"on {len(self.bot.guilds)} servers | /help",
-                "/invite | /vote | /community",
-                "https://fumes.top | /help",
+                "/invite | /vote | /review | /community",
+                "https://fumes.top/fumetune",
             ]
         )
 

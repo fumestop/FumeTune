@@ -10,7 +10,6 @@ from typing import cast
 import discord
 from discord import ui, app_commands
 from discord.ext import commands
-
 from discord.ext.menus import Menu, ListPageSource
 from discord.ext.menus.views import ViewMenuPages
 
@@ -563,35 +562,34 @@ class Music(commands.Cog):
 
         for activity in member.activities:
             if isinstance(activity, discord.Spotify):
-                break
+                embed = discord.Embed(color=self.bot.embed_colour)
+                embed.set_thumbnail(url=activity.album_cover_url)
+
+                embed.add_field(name="Track", value=activity.title)
+                embed.add_field(name="Artist", value=activity.artist)
+                embed.add_field(name="Album", value=activity.album)
+                embed.add_field(
+                    name="Started Listening",
+                    value=f"<t:{int(activity.created_at.timestamp())}:R>",
+                )
+                embed.add_field(
+                    name="Duration",
+                    value=parse_duration(activity.duration.total_seconds() * 1000),
+                )
+                embed.add_field(
+                    name="Track Started",
+                    value=f"<t:{int(activity.start.timestamp())}:t>",
+                )
+                embed.add_field(
+                    name="Track Ending", value=f"<t:{int(activity.end.timestamp())}:t>"
+                )
+
+                return await ctx.edit_original_response(embed=embed)
 
         else:
             return await ctx.edit_original_response(
                 content=f"`{member.display_name}` is not listening to Spotify right now."
             )
-
-        embed = discord.Embed(color=self.bot.embed_colour)
-        embed.set_thumbnail(url=activity.album_cover_url)
-
-        embed.add_field(name="Track", value=activity.title)
-        embed.add_field(name="Artist", value=activity.artist)
-        embed.add_field(name="Album", value=activity.album)
-        embed.add_field(
-            name="Started Listening",
-            value=f"<t:{int(activity.created_at.timestamp())}:t>",
-        )
-        embed.add_field(
-            name="Duration",
-            value=parse_duration(activity.duration.total_seconds() * 1000),
-        )
-        embed.add_field(
-            name="Track Started", value=f"<t:{int(activity.start.timestamp())}:t>"
-        )
-        embed.add_field(
-            name="Track Ending", value=f"<t:{int(activity.end.timestamp())}:t>"
-        )
-
-        await ctx.edit_original_response(embed=embed)
 
     @app_commands.command(
         name="summon", description="Summon the bot to a voice channel."
@@ -657,9 +655,22 @@ class Music(commands.Cog):
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _play(self, ctx: discord.Interaction, query: str):
+        # noinspection PyUnresolvedReferences
+        await ctx.response.defer(thinking=True)
+
         player: Player = cast(Player, ctx.guild.voice_client)
 
-        tracks: wavelink.Search = await wavelink.Playable.search(query.strip("<>"))
+        try:
+            tracks: wavelink.Search = await wavelink.Playable.search(query)
+
+        except (
+            wavelink.exceptions.LavalinkException,
+            wavelink.exceptions.LavalinkLoadException,
+        ):
+            return await ctx.edit_original_response(
+                content="An error occurred while loading associated tracks. "
+                "Please try again with another query."
+            )
 
         if not tracks:
             return await ctx.edit_original_response(
@@ -689,40 +700,22 @@ class Music(commands.Cog):
     @app_commands.checks.dynamic_cooldown(dynamic_cooldown_x)
     @app_commands.guild_only()
     async def _search(self, ctx: discord.Interaction, query: str):
-        player: Player = cast(Player, ctx.guild.voice_client)
-
-        if not player:
-            channel = ctx.user.voice.channel
-
-            if (
-                not channel.permissions_for(ctx.guild.me).connect
-                or not channel.permissions_for(ctx.guild.me).speak
-            ):
-                return await ctx.edit_original_response(
-                    content="Sorry, I do not have permissions to `Connect` "
-                    "and/or `Speak` in that voice channel."
-                )
-
-            if len(channel.members) == channel.user_limit:
-                return await ctx.edit_original_response(
-                    content="Sorry, that voice channel is full."
-                )
-
-            pl = Player(ctx=ctx)
-
-            try:
-                _: Player = await channel.connect(cls=pl)
-
-            except wavelink.exceptions.ChannelTimeoutException:
-                return await ctx.edit_original_response(
-                    content="I was unable to connect to that voice channel."
-                )
-
-        query = query.strip("<>")
+        # noinspection PyUnresolvedReferences
+        await ctx.response.defer(thinking=True)
 
         embed = discord.Embed(color=self.bot.embed_colour)
 
-        tracks: wavelink.Search = await wavelink.Playable.search(query.strip("<>"))
+        try:
+            tracks: wavelink.Search = await wavelink.Playable.search(query)
+
+        except (
+            wavelink.exceptions.LavalinkException,
+            wavelink.exceptions.LavalinkLoadException,
+        ):
+            return await ctx.edit_original_response(
+                content="An error occurred while loading associated tracks. "
+                "Please try again with another query."
+            )
 
         if not tracks:
             return await ctx.edit_original_response(
