@@ -1,5 +1,7 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import io
-import json
 import inspect
 import asyncio
 import textwrap
@@ -8,37 +10,42 @@ import subprocess
 from contextlib import redirect_stdout
 
 import discord
-from discord import ui, app_commands
+from discord import app_commands
 from discord.ext import commands
 
+from config import COMMUNITY_GUILD_ID
+from utils.modals import EvalModal, ExecModal
 
-with open("config.json") as json_file:
-    data = json.load(json_file)
-    community_server_id = data["community_server_id"]
+if TYPE_CHECKING:
+    from bot import FumeTune
 
 
-class EvalModal(ui.Modal, title="Evaluate Code"):
-    code = ui.TextInput(
-        label="Code",
-        placeholder="The code to evaluate...",
-        style=discord.TextStyle.paragraph,
-    )
-
-    bot: commands.AutoShardedBot = None
-    interaction: discord.Interaction = None
+class Evaluate(commands.Cog):
+    def __init__(self, bot: FumeTune):
+        self.bot: FumeTune = bot
 
     # noinspection PyBroadException
-    async def on_submit(self, ctx: discord.Interaction):
-        self.interaction = ctx
+    @app_commands.command(name="eval")
+    @app_commands.guilds(COMMUNITY_GUILD_ID)
+    async def _eval(self, ctx: discord.Interaction):
+        """Evaluate a block of Python code."""
+        if self.bot.owner != ctx.user:
+            # noinspection PyUnresolvedReferences
+            await ctx.response.send_message(
+                content="Sorry, this is an owner only command!"
+            )
+
+        modal = EvalModal()
+        modal.ctx = ctx
 
         # noinspection PyUnresolvedReferences
-        await ctx.response.defer(thinking=True)
+        await ctx.response.send_modal(modal)
+        await modal.wait()
 
         env = {
             "discord": discord,
             "ctx": ctx,
             "bot": self.bot,
-            "self.bot": self.bot,
             "channel": ctx.channel,
             "user": ctx.user,
             "guild": ctx.guild,
@@ -47,7 +54,9 @@ class EvalModal(ui.Modal, title="Evaluate Code"):
             "asyncio": asyncio,
         }
 
-        def cleanup_code(content):
+        def _cleanup_code(content):
+            content.replace("self.bot", "bot")
+
             if content.startswith("```") and content.endswith("```"):
                 return "\n".join(content.split("\n")[1:-1])
 
@@ -55,12 +64,12 @@ class EvalModal(ui.Modal, title="Evaluate Code"):
 
         env.update(globals())
 
-        body = cleanup_code(self.code.value)
+        body = _cleanup_code(modal.code.value)
         stdout = io.StringIO()
 
         to_compile = f'async def func():\n{textwrap.indent(body, "  ")}'
 
-        def paginate(text: str):
+        def _paginate(text: str):
             app_index = 0
             last = 0
             curr = 0
@@ -81,7 +90,7 @@ class EvalModal(ui.Modal, title="Evaluate Code"):
             exec(to_compile, env)
 
         except Exception as e:
-            await self.interaction.edit_original_response(
+            await modal.interaction.edit_original_response(
                 content=f"```py\n{e.__class__.__name__}: {e}\n```"
             )
 
@@ -94,7 +103,7 @@ class EvalModal(ui.Modal, title="Evaluate Code"):
 
         except Exception as _:
             value = stdout.getvalue()
-            await self.interaction.edit_original_response(
+            await modal.interaction.edit_original_response(
                 content=f"```py\n{value}{traceback.format_exc()}\n```"
             )
 
@@ -104,128 +113,81 @@ class EvalModal(ui.Modal, title="Evaluate Code"):
             if ret is None:
                 if value:
                     try:
-                        await self.interaction.edit_original_response(
+                        await modal.interaction.edit_original_response(
                             content=f"```py\n{value}\n```"
                         )
 
                     except Exception as _:
-                        paginated_text = paginate(value)
+                        paginated_text = _paginate(value)
 
                         for page in paginated_text:
                             if page == paginated_text[-1]:
-                                await self.interaction.edit_original_response(
+                                await modal.interaction.edit_original_response(
                                     content=f"```py\n{page}\n```"
                                 )
                                 break
-                            await self.interaction.edit_original_response(
+                            await modal.interaction.edit_original_response(
                                 content=f"```py\n{page}\n```"
                             )
                 else:
-                    await self.interaction.edit_original_response(content="\U00002705")
+                    await modal.interaction.edit_original_response(
+                        content="\U00002705"
+                    )
 
             else:
                 try:
-                    await self.interaction.edit_original_response(
+                    await modal.interaction.edit_original_response(
                         content=f"```py\n{value}{ret}\n```"
                     )
 
                 except Exception as _:
-                    paginated_text = paginate(f"{value}{ret}")
+                    paginated_text = _paginate(f"{value}{ret}")
 
                     for page in paginated_text:
                         if page == paginated_text[-1]:
-                            await self.interaction.edit_original_response(
+                            await modal.interaction.edit_original_response(
                                 content=f"```py\n{page}\n```"
                             )
                             break
 
-                        await self.interaction.edit_original_response(
+                        await modal.interaction.edit_original_response(
                             content=f"```py\n{page}\n```"
                         )
 
+    @app_commands.command(name="exec")
+    @app_commands.guilds(COMMUNITY_GUILD_ID)
+    async def _exec(self, ctx: discord.Interaction):
+        """Execute a shell command."""
+        if self.bot.owner != ctx.user:
+            # noinspection PyUnresolvedReferences
+            await ctx.response.send_message(
+                content="Sorry, this is an owner only command!"
+            )
 
-class ExecModal(ui.Modal, title="Execute Shell Commands"):
-    cmds = ui.TextInput(
-        label="Code",
-        placeholder="The command(s) to execute...",
-        style=discord.TextStyle.paragraph,
-    )
-
-    bot: commands.AutoShardedBot = None
-    interaction: discord.Interaction = None
-
-    # noinspection PyBroadException
-    async def on_submit(self, ctx: discord.Interaction):
-        self.interaction = ctx
+        modal = ExecModal()
+        modal.ctx = ctx
 
         # noinspection PyUnresolvedReferences
-        await ctx.response.defer(thinking=True)
+        await ctx.response.send_modal(modal)
+        await modal.wait()
 
-        proc = subprocess.run(
-            self.cmds.value,
+        process = subprocess.run(
+            modal.sh_commands.value,
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             timeout=300,
         )
 
-        stdout_value = proc.stdout.decode("utf-8") + proc.stderr.decode("utf-8")
+        stdout_value = process.stdout.decode("utf-8") + process.stderr.decode(
+            "utf-8"
+        )
         stdout_value = "\n".join(stdout_value.split("\n")[-25:])
 
-        await self.interaction.edit_original_response(
+        await modal.interaction.edit_original_response(
             content="```sh\n" + stdout_value + "```"
         )
 
 
-class Evaluate(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
-    # noinspection PyBroadException
-    @app_commands.command(name="eval")
-    @app_commands.guilds(community_server_id)
-    async def _eval(self, ctx: discord.Interaction):
-        if not await self.bot.is_owner(ctx.user):
-            # noinspection PyUnresolvedReferences
-            await ctx.response.send_message(
-                content="Sorry, this is an owner(s) only command!"
-            )
-
-        modal = EvalModal()
-        modal.timeout = 60
-        modal.bot = self.bot
-
-        # noinspection PyUnresolvedReferences
-        await ctx.response.send_modal(modal)
-        res = await modal.wait()
-
-        if res:
-            return await ctx.followup.send(
-                content="Timeout! Please try again.", ephemeral=True
-            )
-
-    @app_commands.command(name="exec")
-    @app_commands.guilds(community_server_id)
-    async def _exec(self, ctx: discord.Interaction):
-        if not await self.bot.is_owner(ctx.user):
-            # noinspection PyUnresolvedReferences
-            await ctx.response.send_message(
-                content="Sorry, this is an owner(s) only command!"
-            )
-
-        modal = ExecModal()
-        modal.timeout = 60
-        modal.bot = self.bot
-
-        # noinspection PyUnresolvedReferences
-        await ctx.response.send_modal(modal)
-        res = await modal.wait()
-
-        if res:
-            return await ctx.followup.send(
-                content="Timeout! Please try again.", ephemeral=True
-            )
-
-
-async def setup(bot):
+async def setup(bot: FumeTune):
     await bot.add_cog(Evaluate(bot))
