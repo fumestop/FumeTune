@@ -161,15 +161,15 @@ cython_debug/
 
 # FumeTune
 lavalink/application.yml
-lavalink/Lavalink.jar
 
 lavalink/logs/*.log
 lavalink/logs/*.gz
 
+lavalink/Lavalink.jar
 lavalink/plugins/*.jar
 
 logs/*.log
 logs/errors/*.log
 logs/tracks/*.log
 
-config.json
+config.py

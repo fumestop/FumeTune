@@ -1,4 +1,6 @@
-import json
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import string
 import random
 import traceback
@@ -8,14 +10,13 @@ from discord import app_commands
 from discord.ext import commands
 
 
+if TYPE_CHECKING:
+    from bot import FumeTune
+
+
 class Error(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
-        with open("config.json") as f:
-            data = json.load(f)
-
-        self.log_channel_id = data["log_channel_id"]
+    def __init__(self, bot: FumeTune):
+        self.bot: FumeTune = bot
 
     async def cog_load(self):
         await self.global_app_command_error_handler(bot=self.bot)
@@ -26,19 +27,25 @@ class Error(commands.Cog):
             ctx: discord.Interaction,
             error: app_commands.AppCommandError,
         ):
-            if isinstance(error, app_commands.CheckFailure):
-                message = error.__str__()
-
-            elif isinstance(error, app_commands.CommandOnCooldown):
+            if isinstance(
+                error,
+                (
+                    app_commands.CommandOnCooldown,
+                    app_commands.errors.CommandOnCooldown,
+                ),
+            ):
                 message = f"You are on cooldown. Please try again in **{round(error.retry_after, 2)}** seconds."
 
+            elif isinstance(error, app_commands.errors.CheckFailure):
+                message = error.__str__()
+
             else:
-                embed = discord.Embed(colour=self.bot.embed_colour)
+                embed = discord.Embed(colour=self.bot.embed_color)
 
                 embed.title = "Oops! Something went wrong."
                 embed.description = (
                     f"```css\n{error.__str__()}```"
-                    f"\nThe error has been reported to the community server."
+                    f"\nThe error has been reported to the community server. "
                 )
 
                 # noinspection PyUnresolvedReferences
@@ -49,6 +56,7 @@ class Error(commands.Cog):
                     # noinspection PyUnresolvedReferences
                     await ctx.response.send_message(embed=embed, ephemeral=True)
 
+                embed.title = "Error Report"
                 embed.description = ""
 
                 embed.add_field(
@@ -73,18 +81,24 @@ class Error(commands.Cog):
                     value=f"Saved to `{file_name}`",
                 )
 
-                channel = self.bot.get_channel(self.log_channel_id)
-
-                return await channel.send(embed=embed)
+                return await self.bot.webhook.send(embed=embed)
 
             # noinspection PyUnresolvedReferences
             if ctx.response.is_done():
                 # noinspection PyUnresolvedReferences
-                await ctx.edit_original_response(content=message)
+                try:
+                    await ctx.edit_original_response(content=message, view=None)
+
+                except (discord.NotFound, discord.errors.NotFound):
+                    await ctx.followup.send(
+                        content=message, ephemeral=True, view=None
+                    )
             else:
                 # noinspection PyUnresolvedReferences
-                await ctx.response.send_message(content=message, ephemeral=True)
+                await ctx.response.send_message(
+                    content=message, ephemeral=True, view=None
+                )
 
 
-async def setup(bot):
+async def setup(bot: FumeTune):
     await bot.add_cog(Error(bot))
