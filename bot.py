@@ -110,7 +110,7 @@ class FumeTune(commands.AutoShardedBot):
             except Exception as e:
                 self.log.error(f"Failed to load extension {_extension}.", exc_info=e)
 
-    @tasks.loop(minutes=15)
+    @tasks.loop(minutes=30)
     async def _update_status_items(self):
         self._status_items = cycle(
             [
