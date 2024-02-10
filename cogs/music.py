@@ -13,12 +13,13 @@ from discord.ext.menus.views import ViewMenuPages
 import wavelink
 
 from utils.cd import cooldown_level_0
-from utils.tools import parse_duration
 from utils.player import Player
+from utils.tools import parse_duration
+from utils.helpers import is_privileged, required_votes
 from utils.paginators import QueuePaginatorSource
 from utils.selects import TrackSelect
 from utils.views import TrackConfirm, PlaylistConfirm
-from utils.checks import initial_checks, is_privileged, required_votes
+from utils.checks import initial_checks
 
 if TYPE_CHECKING:
     from bot import FumeTune

@@ -10,8 +10,9 @@ from discord import ui, app_commands
 from discord.ext import commands
 
 from utils.cd import cooldown_level_0
-from utils.checks import initial_checks, is_privileged
+from utils.checks import initial_checks
 from utils.player import Player
+from utils.helpers import is_privileged
 from utils.modals import FilterModal
 
 if TYPE_CHECKING:
@@ -33,11 +34,11 @@ class Filters(
     @app_commands.checks.dynamic_cooldown(cooldown_level_0)
     @app_commands.choices(
         equalizer_type=[
-            app_commands.Choice(name="Reset", value="reset"),
             app_commands.Choice(name="Boost", value="boost"),
             app_commands.Choice(name="Flat", value="flat"),
             app_commands.Choice(name="Metal", value="metal"),
             app_commands.Choice(name="Piano", value="piano"),
+            app_commands.Choice(name="Reset", value="reset"),
         ]
     )
     async def _filter_equalizer(
@@ -163,13 +164,13 @@ class Filters(
     @app_commands.checks.dynamic_cooldown(cooldown_level_0)
     @app_commands.choices(
         channel_mix_type=[
-            app_commands.Choice(name="Reset", value="reset"),
             app_commands.Choice(name="Full Left", value="full_left"),
             app_commands.Choice(name="Full Right", value="full_right"),
             app_commands.Choice(name="Mono", value="mono"),
             app_commands.Choice(name="Only Left", value="only_left"),
             app_commands.Choice(name="Only Right", value="only_right"),
             app_commands.Choice(name="Switch", value="switch"),
+            app_commands.Choice(name="Reset", value="reset"),
         ]
     )
     async def _filter_channel_mix(
@@ -253,7 +254,6 @@ class Filters(
     @app_commands.checks.dynamic_cooldown(cooldown_level_0)
     @app_commands.choices(
         filter_type=[
-            app_commands.Choice(name="Reset All", value="reset_all"),
             app_commands.Choice(name="Karaoke", value="karaoke"),
             app_commands.Choice(name="Timescale", value="timescale"),
             app_commands.Choice(name="Tremolo", value="tremolo"),
@@ -261,6 +261,7 @@ class Filters(
             app_commands.Choice(name="Rotation", value="rotation"),
             app_commands.Choice(name="Distortion", value="distortion"),
             app_commands.Choice(name="Low Pass", value="low_pass"),
+            app_commands.Choice(name="Reset All", value="reset_all"),
         ]
     )
     async def _filter_other(

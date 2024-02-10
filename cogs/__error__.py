@@ -40,7 +40,7 @@ class Error(commands.Cog):
                 message = error.__str__()
 
             else:
-                embed = discord.Embed(colour=self.bot.embed_color)
+                embed = discord.Embed(color=self.bot.embed_color)
 
                 embed.title = "Oops! Something went wrong."
                 embed.description = (
