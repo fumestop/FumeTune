@@ -70,7 +70,7 @@ class Music(commands.Cog):
 
         embed.add_field(name="Log", value=f"Saved to `{file_name}`", inline=False)
 
-        return await self.bot.webhook.send(embed=embed)
+        await self.bot.webhook.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_wavelink_track_stuck(
@@ -137,6 +137,7 @@ class Music(commands.Cog):
             for m in channel.members:
                 if m.bot:
                     continue
+
                 else:
                     player.dj = m
                     return
@@ -211,8 +212,14 @@ class Music(commands.Cog):
             )
 
         elif isinstance(tracks, wavelink.Playlist):
+            """
             tracks.extras = {"requester_id": ctx.user.id}
             await player.queue.put_wait(tracks)
+            """
+
+            for track in tracks.tracks:
+                track.extras = {"requester_id": ctx.user.id}
+                await player.queue.put_wait(track)
 
         else:
             track: wavelink.Playable = tracks[0]

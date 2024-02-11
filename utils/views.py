@@ -73,8 +73,14 @@ class PlaylistConfirm(ui.View):
                 view=None,
             )
 
+        """
         self.playlist.extras = {"requester_id": ctx.user.id}
         await player.queue.put_wait(self.playlist)
+        """
+
+        for track in self.playlist.tracks:
+            track.extras = {"requester_id": ctx.user.id}
+            await player.queue.put_wait(track)
 
         if not player.playing:
             await player.do_next()
@@ -82,7 +88,9 @@ class PlaylistConfirm(ui.View):
         self.stop()
 
         # noinspection PyUnresolvedReferences
-        return await self.ctx.response.send_message(
+        await ctx.response.defer()
+        # noinspection PyUnresolvedReferences
+        await self.ctx.edit_original_response(
             content="Enqueued! \U0001F44C", embed=None, view=None
         )
 
