@@ -44,7 +44,7 @@ class Music(commands.Cog):
 
         await player.do_next()
 
-        await player.channel.send(
+        await player.ctx.channel.send(
             content="The song encountered an error, **it is being skipped.**"
         )
 
@@ -55,13 +55,13 @@ class Music(commands.Cog):
         exception = {
             "title": payload.track.title,
             "source": payload.track.source,
-            "severity": payload.exception.severity,
-            "cause": payload.exception.cause,
-            "message": payload.exception.message,
+            "severity": payload.exception["severity"],
+            "cause": payload.exception["cause"],
+            "message": payload.exception["message"],
         }
 
         file_name = (
-            f"logs/tracks/{payload.track.identifier}"
+            f"logs/tracks/{payload.track.identifier}-"
             f"{''.join(random.choices(string.ascii_letters + string.digits, k=10))}.log"
         )
 
@@ -84,7 +84,7 @@ class Music(commands.Cog):
         player.queue.put_at(0, payload.track)
         await player.do_next()
 
-        await player.channel.send(
+        await player.ctx.channel.send(
             content="The song got stuck, **it is being replayed.**"
         )
 
@@ -212,7 +212,6 @@ class Music(commands.Cog):
             )
 
         elif isinstance(tracks, wavelink.Playlist):
-            """
             tracks.extras = {"requester_id": ctx.user.id}
             await player.queue.put_wait(tracks)
             """
@@ -220,6 +219,8 @@ class Music(commands.Cog):
             for track in tracks.tracks:
                 track.extras = {"requester_id": ctx.user.id}
                 await player.queue.put_wait(track)
+                
+            """
 
         else:
             track: wavelink.Playable = tracks[0]
