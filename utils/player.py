@@ -21,7 +21,7 @@ class Player(wavelink.Player):
 
         self.waiting: bool = False
         self.loop: bool = False
-        self.loop_all: bool = False
+        self.loop_queue: bool = False
 
         self.pause_votes: set = set()
         self.resume_votes: set = set()
