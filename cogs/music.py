@@ -98,7 +98,7 @@ class Music(commands.Cog):
         if player.loop:
             player.queue.put_at(0, payload.original)
 
-        elif player.loop_all:
+        elif player.loop_queue:
             await player.queue.put_wait(payload.original)
 
         if player.queue.count == 0:
@@ -212,15 +212,9 @@ class Music(commands.Cog):
             )
 
         elif isinstance(tracks, wavelink.Playlist):
-            tracks.extras = {"requester_id": ctx.user.id}
-            await player.queue.put_wait(tracks)
-            """
-
             for track in tracks.tracks:
                 track.extras = {"requester_id": ctx.user.id}
                 await player.queue.put_wait(track)
-                
-            """
 
         else:
             track: wavelink.Playable = tracks[0]
@@ -542,8 +536,7 @@ class Music(commands.Cog):
                 content="The song has been skipped."
             )
 
-        # noinspection PyUnresolvedReferences
-        if ctx.user == self.ctx.guild.get_member(player.current.extras.requester_id):
+        if ctx.user == ctx.guild.fetch_member(player.current.extras.requester_id):
             player.skip_votes.clear()
             await player.skip()
 
