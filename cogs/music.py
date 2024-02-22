@@ -42,10 +42,14 @@ class Music(commands.Cog):
         if not player:
             return
 
+        player.loop = False
+        player.loop_queue = False
+
         await player.do_next()
 
         await player.ctx.channel.send(
-            content="The song encountered an error, **it is being skipped.**"
+            content="The song encountered an error, **it is being skipped** "
+            "(Any loops if set have been removed)."
         )
 
         embed = discord.Embed(colour=self.bot.embed_color)
