@@ -540,7 +540,7 @@ class Music(commands.Cog):
                 content="The song has been skipped."
             )
 
-        if ctx.user == ctx.guild.fetch_member(player.current.extras.requester_id):
+        if ctx.user.id == player.current.extras.requester_id:
             player.skip_votes.clear()
             await player.skip()
 

@@ -50,9 +50,9 @@ plugins:
 
 lavalink:
     plugins:
-        - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.0.0"
-        - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0"
-        - dependency: "com.github.topi314.sponsorblock:sponsorblock-plugin:3.0.0"
+        - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:X.X.X"
+        - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:X.X.X"
+        - dependency: "com.github.topi314.sponsorblock:sponsorblock-plugin:X.X.X"
     server:
         password: "youshallnotpass"
         sources:
