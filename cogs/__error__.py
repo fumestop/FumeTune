@@ -39,6 +39,12 @@ class Error(commands.Cog):
             elif isinstance(error, app_commands.errors.CheckFailure):
                 message = error.__str__()
 
+            elif (
+                isinstance(error, app_commands.errors.CommandInvokeError)
+                and "InvalidNodeException" in error.__str__()
+            ):
+                message = "No music node is currently available to serve your request. Please try again later."
+
             else:
                 embed = discord.Embed(color=self.bot.embed_color)
 
