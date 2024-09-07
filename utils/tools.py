@@ -5,8 +5,15 @@ import datetime
 
 
 def parse_duration(duration: Union[int, float]):
-    duration = round(duration / 1000) * 1000
-    return str(datetime.timedelta(milliseconds=duration))
+    days = duration // (24 * 60 * 60 * 1000)
+    remaining_milliseconds = duration % (24 * 60 * 60 * 1000)
+
+    seconds = remaining_milliseconds // 1000
+    milliseconds = remaining_milliseconds % 1000
+
+    return str(
+        datetime.timedelta(days=days, seconds=seconds, milliseconds=milliseconds)
+    )
 
 
 def parse_cooldown(retry_after: Union[int, float]):
