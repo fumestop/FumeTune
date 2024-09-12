@@ -73,14 +73,13 @@ class PlaylistConfirm(ui.View):
                 view=None,
             )
 
-        """
+        if any(track.length > 24 * 60 * 60 * 1000 for track in self.playlist.tracks):
+            return await ctx.edit_original_response(
+                content="Sorry, one or more songs are too long to be played **(>24 hours)**."
+            )
+
         self.playlist.extras = {"requester_id": ctx.user.id}
         await player.queue.put_wait(self.playlist)
-        """
-
-        for track in self.playlist.tracks:
-            track.extras = {"requester_id": ctx.user.id}
-            await player.queue.put_wait(track)
 
         if not player.playing:
             await player.do_next()

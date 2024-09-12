@@ -216,12 +216,23 @@ class Music(commands.Cog):
             )
 
         elif isinstance(tracks, wavelink.Playlist):
+            if any(track.length > 24 * 60 * 60 * 1000 for track in tracks.tracks):
+                return await ctx.edit_original_response(
+                    content="Sorry, one or more songs are too long to be played **(>24 hours)**."
+                )
+
             for track in tracks.tracks:
                 track.extras = {"requester_id": ctx.user.id}
                 await player.queue.put_wait(track)
 
         else:
             track: wavelink.Playable = tracks[0]
+
+            if track.length > 24 * 60 * 60 * 1000:
+                return await ctx.edit_original_response(
+                    content="Sorry, the song is too long to be played **(>24 hours)**."
+                )
+
             track.extras = {"requester_id": ctx.user.id}
             await player.queue.put_wait(track)
 
@@ -302,9 +313,11 @@ class Music(commands.Cog):
 
             embed.add_field(
                 name="Name",
-                value=f"**[{tracks.name}]({tracks.url})**"
-                if tracks.url
-                else tracks.name,
+                value=(
+                    f"**[{tracks.name}]({tracks.url})**"
+                    if tracks.url
+                    else tracks.name
+                ),
             )
 
             if tracks.author:

@@ -39,7 +39,7 @@ class TrackSelect(ui.Select):
 
             await player.teardown()
 
-            return self.ctx.edit_original_response(
+            return await self.ctx.edit_original_response(
                 content="You are not connected to a voice channel. "
                 "Please connect to a voice channel and try again.",
                 embed=None,
@@ -47,6 +47,14 @@ class TrackSelect(ui.Select):
             )
 
         track = self.tracks[int(self.values[0]) - 1]
+
+        if track.length > 24 * 60 * 60 * 1000:
+            return await self.ctx.edit_original_response(
+                content="The track is too long to be played **(>24 hours)**.",
+                embed=None,
+                view=None,
+            )
+
         track.extras = {"requester_id": self.ctx.user.id}
 
         await player.queue.put_wait(track)
