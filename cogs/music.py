@@ -1,25 +1,25 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional, cast
 
 import json
-import string
 import random
+import string
 
 import discord
+import wavelink
 from discord import app_commands
 from discord.ext import commands
 from discord.ext.menus.views import ViewMenuPages
 
-import wavelink
-
 from utils.cd import cooldown_level_0
-from utils.player import Player
 from utils.tools import parse_duration
-from utils.helpers import is_privileged, required_votes
-from utils.paginators import QueuePaginatorSource
-from utils.selects import TrackSelect
 from utils.views import TrackConfirm, PlaylistConfirm
 from utils.checks import initial_checks
+from utils.player import Player
+from utils.helpers import is_privileged, required_votes
+from utils.selects import TrackSelect
+from utils.paginators import QueuePaginatorSource
 
 if TYPE_CHECKING:
     from bot import FumeTune

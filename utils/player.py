@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import asyncio
-import wavelink
-import async_timeout
 
 import discord
+import wavelink
+import async_timeout
 
 from utils.tools import parse_duration
 

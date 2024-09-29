@@ -1,11 +1,11 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional
 
 import textwrap
 
-from azapi import AZlyrics
-
 import discord
+from azapi import AZlyrics
 from discord import app_commands
 from discord.ext import commands
 from discord.ext.menus.views import ViewMenuPages

@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
-from discord.ext import commands, tasks
+from discord.ext import tasks, commands
 
 if TYPE_CHECKING:
     from bot import FumeTune
@@ -22,9 +23,7 @@ class TopGG(commands.Cog):
             )
 
         except Exception as e:
-            self.bot.log.error(
-                f"Failed to post server count\n{e.__class__.__name__}: {e}"
-            )
+            self.bot.log.error(f"Failed to post server count", exc_info=e)
 
     @commands.Cog.listener()
     async def on_ready(self):

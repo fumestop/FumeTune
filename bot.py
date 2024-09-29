@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import Any
 
 import logging
@@ -7,18 +8,17 @@ from itertools import cycle
 
 import topgg
 import aiohttp
+import discord
 import aiomysql
 import wavelink
-
-import discord
-from discord.app_commands import CommandTree
-from discord.ext import commands, tasks
+from discord.ext import tasks, commands
 from discord.ext.ipc import Server
+from discord.app_commands import CommandTree
 
 import config
 from utils.db import (
-    guild_exists,
     add_guild,
+    guild_exists,
     is_blacklisted_user,
     is_blacklisted_guild,
 )
@@ -77,6 +77,7 @@ class FumeTune(commands.AutoShardedBot):
         intents.presences = True
         intents.members = True
 
+        # noinspection PyTypeChecker
         super().__init__(
             command_prefix=commands.when_mentioned,
             description=description,
@@ -144,8 +145,13 @@ class FumeTune(commands.AutoShardedBot):
     async def on_ready(self) -> None:
         self._launch_time = datetime.now()
 
-        self._update_status_items.start()
-        self._change_status.start()
+        try:
+            self._update_status_items.start()
+            self._change_status.start()
+
+        except RuntimeError:
+            self._update_status_items.restart()
+            self._change_status.restart()
 
         await self.connect_nodes()
 

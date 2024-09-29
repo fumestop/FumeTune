@@ -1,3 +1,43 @@
+[tool.poetry]
+name = "FumeTune"
+version = "1.0.0"
+description = "Unlock the ultimate music experience for YOUR Discord community with FumeTune!"
+authors = ["Sayan Bhattacharyya <sn1f3rt@outlook.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+discord-py = {extras = ["speed", "voice"], version = "^2.4.0"}
+better-ipc = {git = "https://github.com/MiroslavRosenov/better-ipc"}
+discord-ext-menus-views = {git = "https://github.com/FumeStop/discord-ext-menus-views"}
+aiomysql = "^0.2.0"
+async-timeout = "^4.0.3"
+azapi = "^3.0.8"
+discord-ext-menus = {git = "https://github.com/Rapptz/discord-ext-menus"}
+wavelink = "^3.4.1"
+topggpy = "^1.4.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+isort = "^5.13.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.black]
 line-length = 85
-target-version = ["py311"]
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+known_future_library = ["__future__"]
+known_typing = ["typing"]
+sections = ["FUTURE", "TYPING", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+default_section = "THIRDPARTY"
+line_length = 85
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+combine_as_imports = true
+length_sort = true
