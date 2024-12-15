@@ -1,19 +1,18 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
-
 import collections
+from typing import TYPE_CHECKING, cast
 
 import discord
 import wavelink
-from discord import ui, app_commands
+from discord import app_commands, ui
 from discord.ext import commands
 
 from utils.cd import cooldown_level_0
 from utils.checks import initial_checks
+from utils.helpers import is_privileged
 from utils.modals import FilterModal
 from utils.player import Player
-from utils.helpers import is_privileged
 
 if TYPE_CHECKING:
     from bot import FumeTune

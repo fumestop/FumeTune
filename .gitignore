@@ -160,16 +160,16 @@ cython_debug/
 .idea/
 
 # FumeTune
+config.py
+
 lavalink/application.yml
-
-lavalink/logs/*.log
-lavalink/logs/*.gz
-
 lavalink/Lavalink.jar
 lavalink/plugins/*.jar
+lavalink/logs/*.log
+lavalink/logs/*.gz
 
 logs/*.log
 logs/errors/*.log
 logs/tracks/*.log
 
-config.py
+uv.lock

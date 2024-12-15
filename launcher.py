@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-import sys
 import asyncio
-import logging
 import contextlib
+import logging
+import sys
 from datetime import datetime
 
+import aiomysql
 import click
 import discord
 import pymysql
-import aiomysql
 
 import config
 from bot import FumeTune

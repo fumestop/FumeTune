@@ -18,7 +18,7 @@ class TrackConfirm(ui.View):
         self.ctx: Optional[discord.Interaction] = None
 
     # noinspection PyUnusedLocal
-    @discord.ui.button(emoji="\U0001F6AB")
+    @discord.ui.button(emoji="\U0001f6ab")
     async def _cancel(self, ctx: discord.Interaction, button: discord.ui.Button):
         if not ctx.user.id == self.ctx.user.id:
             # noinspection PyUnresolvedReferences
@@ -91,11 +91,11 @@ class PlaylistConfirm(ui.View):
         await ctx.response.defer()
         # noinspection PyUnresolvedReferences
         await self.ctx.edit_original_response(
-            content="Enqueued! \U0001F44C", embed=None, view=None
+            content="Enqueued! \U0001f44c", embed=None, view=None
         )
 
     # noinspection PyUnusedLocal
-    @discord.ui.button(emoji="\U0001F6AB")
+    @discord.ui.button(emoji="\U0001f6ab")
     async def _cancel(self, ctx: discord.Interaction, button: discord.ui.Button):
         if not ctx.user.id == self.ctx.user.id:
             # noinspection PyUnresolvedReferences

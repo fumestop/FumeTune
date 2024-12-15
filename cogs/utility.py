@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
-
 import textwrap
+from typing import TYPE_CHECKING, Optional
 
 import discord
 from azapi import AZlyrics
@@ -11,8 +10,8 @@ from discord.ext import commands
 from discord.ext.menus.views import ViewMenuPages
 
 from utils.cd import cooldown_level_0, cooldown_level_1
-from utils.tools import parse_duration
 from utils.paginators import LyricsPaginatorSource
+from utils.tools import parse_duration
 
 if TYPE_CHECKING:
     from bot import FumeTune
@@ -68,7 +67,7 @@ class Utility(commands.Cog):
             clear_reactions_after=True,
         )
 
-        await ctx.edit_original_response(content="\U0001F44C")
+        await ctx.edit_original_response(content="\U0001f44c")
         await paginator.start(ctx)
 
     @app_commands.command(name="spotify")

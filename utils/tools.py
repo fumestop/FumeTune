@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import Union
-
 import datetime
+from typing import Union
 
 
 def parse_duration(duration: Union[int, float]):

@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-import io
 import asyncio
 import inspect
+import io
+import subprocess
 import textwrap
 import traceback
-import subprocess
 from contextlib import redirect_stdout
+from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
@@ -131,9 +130,7 @@ class Evaluate(commands.Cog):
                                 content=f"```py\n{page}\n```"
                             )
                 else:
-                    await modal.interaction.edit_original_response(
-                        content="\U00002705"
-                    )
+                    await modal.interaction.edit_original_response(content="\U00002705")
 
             else:
                 try:
@@ -180,9 +177,7 @@ class Evaluate(commands.Cog):
             timeout=300,
         )
 
-        stdout_value = process.stdout.decode("utf-8") + process.stderr.decode(
-            "utf-8"
-        )
+        stdout_value = process.stdout.decode("utf-8") + process.stderr.decode("utf-8")
         stdout_value = "\n".join(stdout_value.split("\n")[-25:])
 
         await modal.interaction.edit_original_response(

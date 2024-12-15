@@ -64,5 +64,5 @@ class TrackSelect(ui.Select):
             await player.do_next()
 
         return await self.ctx.edit_original_response(
-            content="Enqueued! \U0001F44C", embed=None, view=None
+            content="Enqueued! \U0001f44c", embed=None, view=None
         )

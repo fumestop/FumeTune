@@ -7,8 +7,8 @@ from discord.ext.menus import ListPageSource
 
 import config
 
-from .tools import parse_duration
 from .player import Player
+from .tools import parse_duration
 
 if TYPE_CHECKING:
     from discord.ext.menus import Menu
