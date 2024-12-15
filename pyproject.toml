@@ -13,6 +13,7 @@ dependencies = [
     "async-timeout>=5.0.1",
     "azapi>=3.0.8",
     "better-ipc",
+    "click>=8.1.7",
     "discord-ext-menus",
     "discord-ext-menus-views",
     "discord-py[speed,voice]>=2.4.0",
