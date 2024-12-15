@@ -11,20 +11,17 @@ install:
 	uv sync --no-dev
 
 install-dev:
-	uv sync --all-extras
+	uv sync --extra dev
 
 install-extras:
 	uv sync --all-extras --no-dev
 
-dev:
+run:
 	uv run launcher.py
-
-prod:
-	hypercorn --bind 0.0.0.0:13030 --certfile cert.pem --keyfile key.pem launcher:app
 
 format:
 	ruff check --select I --fix .
 	ruff format .
 
-.PHONY: env rmenv activate install install-dev dev prod format
-.DEFAULT_GOAL := dev
+.PHONY: env rmenv activate install install-dev run format
+.DEFAULT_GOAL := run
