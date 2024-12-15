@@ -39,7 +39,7 @@ discord-ext-menus-views = { git = "https://github.com/FumeStop/discord-ext-menus
 
 [tool.ruff]
 line-length = 85
-target-version = "py313"
+target-version = "py312"
 
 [tool.ruff.lint.isort]
 section-order = ["future", "typing", "standard-library", "third-party", "first-party", "local-folder", "config"]
