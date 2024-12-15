@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Optional, cast
+
 import json
 import random
 import string
-from typing import TYPE_CHECKING, Optional, cast
 
 import discord
 import wavelink
@@ -12,13 +13,13 @@ from discord.ext import commands
 from discord.ext.menus.views import ViewMenuPages
 
 from utils.cd import cooldown_level_0
-from utils.checks import initial_checks
-from utils.helpers import is_privileged, required_votes
-from utils.paginators import QueuePaginatorSource
-from utils.player import Player
-from utils.selects import TrackSelect
 from utils.tools import parse_duration
-from utils.views import PlaylistConfirm, TrackConfirm
+from utils.views import TrackConfirm, PlaylistConfirm
+from utils.checks import initial_checks
+from utils.player import Player
+from utils.helpers import is_privileged, required_votes
+from utils.selects import TrackSelect
+from utils.paginators import QueuePaginatorSource
 
 if TYPE_CHECKING:
     from bot import FumeTune
@@ -76,7 +77,9 @@ class Music(commands.Cog):
         await self.bot.webhook.send(embed=embed)
 
     @commands.Cog.listener()
-    async def on_wavelink_track_stuck(self, payload: wavelink.TrackStuckEventPayload):
+    async def on_wavelink_track_stuck(
+        self, payload: wavelink.TrackStuckEventPayload
+    ):
         player: Player = cast(Player, payload.player)
 
         if not player:
@@ -311,7 +314,9 @@ class Music(commands.Cog):
             embed.add_field(
                 name="Name",
                 value=(
-                    f"**[{tracks.name}]({tracks.url})**" if tracks.url else tracks.name
+                    f"**[{tracks.name}]({tracks.url})**"
+                    if tracks.url
+                    else tracks.name
                 ),
             )
 
@@ -348,7 +353,9 @@ class Music(commands.Cog):
                     f"({parse_duration(track.length)})\n\n"
                 )
 
-                options.append(discord.SelectOption(label=str(index), value=str(index)))
+                options.append(
+                    discord.SelectOption(label=str(index), value=str(index))
+                )
 
             embed.description += (
                 "Select the song number within **a minute** to play it, "
@@ -494,7 +501,9 @@ class Music(commands.Cog):
             )
 
         if not player.paused:
-            return await ctx.edit_original_response(content="The player is not paused.")
+            return await ctx.edit_original_response(
+                content="The player is not paused."
+            )
 
         if is_privileged(ctx):
             player.resume_votes.clear()
@@ -623,7 +632,8 @@ class Music(commands.Cog):
 
         if not is_privileged(ctx):
             return await ctx.edit_original_response(
-                content="Only the DJ or admins may set the " "loop state of the player."
+                content="Only the DJ or admins may set the "
+                "loop state of the player."
             )
 
         await player.seek()
@@ -763,7 +773,9 @@ class Music(commands.Cog):
 
         player.queue.delete(position - 1)
 
-        return await ctx.edit_original_response(content=f"That song has been removed!")
+        return await ctx.edit_original_response(
+            content=f"That song has been removed!"
+        )
 
     @app_commands.command(name="flush")
     @app_commands.check(initial_checks)
@@ -789,7 +801,9 @@ class Music(commands.Cog):
         if is_privileged(ctx):
             player.queue.clear()
 
-            return await ctx.edit_original_response(content="Queue has been flushed!")
+            return await ctx.edit_original_response(
+                content="Queue has been flushed!"
+            )
 
         else:
             return await ctx.edit_original_response(
@@ -821,7 +835,9 @@ class Music(commands.Cog):
             player.shuffle_votes.clear()
             player.queue.shuffle()
 
-            return await ctx.edit_original_response(content="Queue has been shuffled!")
+            return await ctx.edit_original_response(
+                content="Queue has been shuffled!"
+            )
 
         required = required_votes(ctx)
         player.shuffle_votes.add(ctx.user)
@@ -857,7 +873,8 @@ class Music(commands.Cog):
 
         if not is_privileged(ctx):
             return await ctx.edit_original_response(
-                content="Only the DJ or admins may set the " "loop state of the player."
+                content="Only the DJ or admins may set the "
+                "loop state of the player."
             )
 
         if not player.loop:
@@ -886,7 +903,8 @@ class Music(commands.Cog):
 
         if not is_privileged(ctx):
             return await ctx.edit_original_response(
-                content="Only the DJ or admins may set the " "loop state of the player."
+                content="Only the DJ or admins may set the "
+                "loop state of the player."
             )
 
         if len(player.queue) == 0:

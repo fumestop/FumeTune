@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import math
 from typing import cast
+
+import math
 
 import discord
 

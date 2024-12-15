@@ -21,7 +21,9 @@ async def guild_exists(pool: aiomysql.Pool, guild_id: int):
 async def add_guild(pool: aiomysql.Pool, guild_id: int):
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
-            await cur.execute("insert into guilds (GUILD_ID) values (%s);", (guild_id,))
+            await cur.execute(
+                "insert into guilds (GUILD_ID) values (%s);", (guild_id,)
+            )
 
 
 async def is_premium_user(pool: aiomysql.Pool, user_id: int):

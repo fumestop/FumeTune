@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import textwrap
 from typing import TYPE_CHECKING, Optional
+
+import textwrap
 
 import discord
 from azapi import AZlyrics
@@ -10,8 +11,8 @@ from discord.ext import commands
 from discord.ext.menus.views import ViewMenuPages
 
 from utils.cd import cooldown_level_0, cooldown_level_1
-from utils.paginators import LyricsPaginatorSource
 from utils.tools import parse_duration
+from utils.paginators import LyricsPaginatorSource
 
 if TYPE_CHECKING:
     from bot import FumeTune

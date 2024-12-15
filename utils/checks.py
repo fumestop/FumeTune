@@ -5,8 +5,8 @@ from typing import cast
 import discord
 from discord import app_commands
 
-from .helpers import is_privileged
 from .player import Player
+from .helpers import is_privileged
 
 
 def initial_checks(ctx: discord.Interaction) -> bool:

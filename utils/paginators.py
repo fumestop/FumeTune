@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Any, Optional, cast
 import discord
 from discord.ext.menus import ListPageSource
 
-import config
-
-from .player import Player
 from .tools import parse_duration
+from .player import Player
+
+import config
 
 if TYPE_CHECKING:
     from discord.ext.menus import Menu

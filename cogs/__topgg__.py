@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from discord.ext import commands, tasks
+from discord.ext import tasks, commands
 
 if TYPE_CHECKING:
     from bot import FumeTune
@@ -18,7 +18,9 @@ class TopGG(commands.Cog):
             await self.bot.topggpy.post_guild_count(
                 guild_count=len(self.bot.guilds), shard_count=len(self.bot.shards)
             )
-            self.bot.log.info(f"Posted server count ({self.bot.topggpy.guild_count})")
+            self.bot.log.info(
+                f"Posted server count ({self.bot.topggpy.guild_count})"
+            )
 
         except Exception as e:
             self.bot.log.error(f"Failed to post server count", exc_info=e)

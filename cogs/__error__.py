@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import random
 import string
 import traceback
-from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
@@ -95,7 +96,9 @@ class Error(commands.Cog):
                     await ctx.edit_original_response(content=message, view=None)
 
                 except (discord.NotFound, discord.errors.NotFound):
-                    await ctx.followup.send(content=message, ephemeral=True, view=None)
+                    await ctx.followup.send(
+                        content=message, ephemeral=True, view=None
+                    )
             else:
                 # noinspection PyUnresolvedReferences
                 await ctx.response.send_message(

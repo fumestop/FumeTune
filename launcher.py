@@ -1,18 +1,19 @@
 from __future__ import annotations
 
-import asyncio
-import contextlib
-import logging
 import sys
+import asyncio
+import logging
+import contextlib
 from datetime import datetime
 
-import aiomysql
 import click
 import discord
 import pymysql
+import aiomysql
+
+from bot import FumeTune
 
 import config
-from bot import FumeTune
 
 try:
     # noinspection PyUnresolvedReferences

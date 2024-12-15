@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import math
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 import discord
 from discord import app_commands
@@ -129,7 +130,9 @@ class General(commands.Cog):
 
         view = discord.ui.View()
         view.add_item(
-            discord.ui.Button(label="Review", url="https://fumes.top/fumetune/review")
+            discord.ui.Button(
+                label="Review", url="https://fumes.top/fumetune/review"
+            )
         )
 
         await ctx.edit_original_response(
