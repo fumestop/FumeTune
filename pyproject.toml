@@ -21,6 +21,11 @@ dependencies = [
     "wavelink>=3.4.1",
 ]
 
+[project.optional-dependencies]
+speed = [
+    "uvloop>=0.21.0",
+]
+
 [tool.uv]
 dev-dependencies = [
     "pre-commit>=4.0.1",
