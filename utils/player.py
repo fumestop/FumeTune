@@ -4,7 +4,6 @@ import asyncio
 
 import discord
 import wavelink
-import async_timeout
 
 from utils.tools import parse_duration
 
@@ -43,7 +42,7 @@ class Player(wavelink.Player):
         try:
             self.waiting = True
 
-            with async_timeout.timeout(300):
+            async with asyncio.timeout(300):
                 track = await self.queue.get_wait()
 
         except asyncio.TimeoutError:

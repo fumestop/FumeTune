@@ -10,7 +10,6 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "aiomysql>=0.2.0",
-    "async-timeout>=5.0.1",
     "azapi>=3.0.8",
     "better-ipc",
     "click>=8.1.7",
