@@ -15,14 +15,13 @@ from bot import FumeTune
 
 import config
 
-try:
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+else:
     # noinspection PyUnresolvedReferences
     import uvloop
 
-except ImportError:
-    pass
-
-else:
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 

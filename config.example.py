@@ -27,6 +27,8 @@ MUSIC_NODES = [
     }
 ]
 
+GENIUS_API_TOKEN = "genius_api_token"
+
 TOPGG_TOKEN = "topgg_token"
 
 INITIAL_EXTENSIONS = [

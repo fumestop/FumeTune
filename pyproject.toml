@@ -10,12 +10,12 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "aiomysql>=0.2.0",
-    "azapi>=3.0.8",
     "better-ipc",
     "click>=8.1.7",
     "discord-ext-menus",
     "discord-ext-menus-views",
     "discord-py[speed,voice]>=2.4.0",
+    "lyricsgenius",
     "topggpy>=1.4.0",
     "wavelink>=3.4.1",
 ]
@@ -35,6 +35,7 @@ dev-dependencies = [
 better-ipc = { git = "https://github.com/MiroslavRosenov/better-ipc", rev = "efb145d9dabc0a90e4c6e32be08bd03ae4257249" }
 discord-ext-menus = { git = "https://github.com/Rapptz/discord-ext-menus" }
 discord-ext-menus-views = { git = "https://github.com/FumeStop/discord-ext-menus-views" }
+lyricsgenius = { git = "https://github.com/ItsJustAGitHubMichealWhosGonnaSeeIt5Ppl/LyricsGenius", rev = "ItsJustAGitHubMichealWhosGonnaSeeIt5Ppl/issue287" }
 
 [tool.ruff]
 line-length = 85

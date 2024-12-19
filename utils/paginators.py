@@ -57,16 +57,18 @@ class LyricsPaginatorSource(ListPageSource):
         entries: list,
         ctx: discord.Interaction,
         title: str,
+        artist: str,
         per_page: Optional[int] = 1,
     ):
         super().__init__(entries, per_page=per_page)
 
         self.ctx = ctx
         self.title = title
+        self.artist = artist
 
     async def format_page(self, menu: Menu, page: Any) -> discord.Embed:
         embed = discord.Embed(color=0xE44C65)
-        embed.title = f"Lyrics | {self.title}"
+        embed.title = f"Lyrics | {self.title} by {self.artist}"
         embed.description = page
 
         return embed

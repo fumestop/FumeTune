@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING, Optional
 import textwrap
 
 import discord
-from azapi import AZlyrics
 from discord import app_commands
 from discord.ext import commands
+from lyricsgenius import Genius
 from discord.ext.menus.views import ViewMenuPages
 
 from utils.cd import cooldown_level_0, cooldown_level_1
@@ -26,7 +26,7 @@ class Utility(commands.Cog):
     @app_commands.checks.dynamic_cooldown(cooldown_level_1)
     @app_commands.guild_only()
     async def _lyrics(
-        self, ctx: discord.Interaction, title: str, artist: Optional[str] = None
+        self, ctx: discord.Interaction, title: str, artist: Optional[str] = ""
     ):
         """Get the lyrics of a song.
 
@@ -41,26 +41,35 @@ class Utility(commands.Cog):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        api = AZlyrics("duckduckgo")
+        genius = Genius(
+            self.bot.config.GENIUS_API_TOKEN,
+            timeout=10.0,
+            remove_section_headers=True,
+            retries=3,
+            verbose=False,
+        )
+        song = genius.search_song(title, artist)
 
-        api.title = title
-        api.artist = artist if artist else ""
-
-        lyrics = api.getLyrics()
+        if not song:
+            return await ctx.edit_original_response(
+                content=f"No lyrics found for `{title}`."
+            )
 
         w = textwrap.TextWrapper(
             width=750, break_long_words=False, replace_whitespace=False
         )
 
         try:
-            entries = w.wrap(text=lyrics)
+            entries = w.wrap(text=song.lyrics)
 
         except AttributeError:
             return await ctx.edit_original_response(
                 content=f"No lyrics found for `{title}`."
             )
 
-        pages = LyricsPaginatorSource(entries=entries, title=api.title, ctx=ctx)
+        pages = LyricsPaginatorSource(
+            entries=entries, title=song.title, artist=song.artist, ctx=ctx
+        )
         paginator = ViewMenuPages(
             source=pages,
             timeout=None,
