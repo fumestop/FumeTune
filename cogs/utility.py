@@ -4,10 +4,11 @@ from typing import TYPE_CHECKING, Optional
 
 import textwrap
 
+from lyricsgenius import Genius
+
 import discord
 from discord import app_commands
 from discord.ext import commands
-from lyricsgenius import Genius
 from discord.ext.menus.views import ViewMenuPages
 
 from utils.cd import cooldown_level_0, cooldown_level_1

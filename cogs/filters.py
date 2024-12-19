@@ -4,8 +4,9 @@ from typing import TYPE_CHECKING, cast
 
 import collections
 
-import discord
 import wavelink
+
+import discord
 from discord import ui, app_commands
 from discord.ext import commands
 

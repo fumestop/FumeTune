@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import asyncio
 
-import discord
 import wavelink
+
+import discord
 
 from utils.tools import parse_duration
 

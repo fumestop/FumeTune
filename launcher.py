@@ -7,9 +7,10 @@ import contextlib
 from datetime import datetime
 
 import click
-import discord
 import pymysql
 import aiomysql
+
+import discord
 
 from bot import FumeTune
 
