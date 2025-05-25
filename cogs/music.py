@@ -633,8 +633,7 @@ class Music(commands.Cog):
 
         if not is_privileged(ctx):
             return await ctx.edit_original_response(
-                content="Only the DJ or admins may set the "
-                "loop state of the player."
+                content="Only the DJ or admins may set the loop state of the player."
             )
 
         await player.seek()
@@ -874,8 +873,7 @@ class Music(commands.Cog):
 
         if not is_privileged(ctx):
             return await ctx.edit_original_response(
-                content="Only the DJ or admins may set the "
-                "loop state of the player."
+                content="Only the DJ or admins may set the loop state of the player."
             )
 
         if not player.loop:
@@ -904,8 +902,7 @@ class Music(commands.Cog):
 
         if not is_privileged(ctx):
             return await ctx.edit_original_response(
-                content="Only the DJ or admins may set the "
-                "loop state of the player."
+                content="Only the DJ or admins may set the loop state of the player."
             )
 
         if len(player.queue) == 0:
