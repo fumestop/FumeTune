@@ -8,4 +8,4 @@
 
 [GNU Affero General Public License v3.0](LICENSE)
 
-Copyright &copy; 2023-present [Sayan "sn1f3rt" Bhattacharyya](https://sn1f3rt.dev)
+Copyright &copy; 2023-2025 [Sayan "sn1f3rt" Bhattacharyya](https://sn1f3rt.dev)
