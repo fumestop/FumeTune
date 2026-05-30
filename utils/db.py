@@ -85,3 +85,19 @@ async def is_blacklisted_guild(pool: aiomysql.Pool, guild_id: int):
         return False
 
     return True
+
+
+async def get_blacklisted_users(pool: aiomysql.Pool) -> set[int]:
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("select USER_ID from user_blacklist;")
+
+            return {row[0] for row in await cur.fetchall()}
+
+
+async def get_blacklisted_guilds(pool: aiomysql.Pool) -> set[int]:
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("select GUILD_ID from guild_blacklist;")
+
+            return {row[0] for row in await cur.fetchall()}

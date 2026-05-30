@@ -19,8 +19,9 @@ from discord.app_commands import CommandTree
 from utils.db import (
     add_guild,
     guild_exists,
-    is_blacklisted_user,
     is_blacklisted_guild,
+    get_blacklisted_users,
+    get_blacklisted_guilds,
 )
 
 import config
@@ -28,8 +29,9 @@ import config
 
 class FumeTree(CommandTree):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        if interaction.guild and await is_blacklisted_guild(
-            self.client.pool, interaction.guild.id
+        if (
+            interaction.guild
+            and interaction.guild.id in self.client.blacklisted_guilds
         ):
             # noinspection PyUnresolvedReferences
             await interaction.response.send_message(
@@ -45,7 +47,7 @@ class FumeTree(CommandTree):
             await interaction.guild.leave()
             return False
 
-        elif await is_blacklisted_user(self.client.pool, interaction.user.id):
+        elif interaction.user.id in self.client.blacklisted_users:
             # noinspection PyUnresolvedReferences
             await interaction.response.send_message(
                 "You are currently blacklisted from using the FumeStop service. "
@@ -92,9 +94,14 @@ class FumeTune(commands.AutoShardedBot):
         self._launch_time: datetime = Any
         self._status_items: cycle = Any
 
+        self.blacklisted_users: set[int] = set()
+        self.blacklisted_guilds: set[int] = set()
+
     async def setup_hook(self) -> None:
         self.session = aiohttp.ClientSession()
         self.bot_app_info = await self.application_info()
+
+        await self._refresh_blacklists()
 
         self.topggpy = topgg.DBLClient(bot=self, token=self.config.TOPGG_TOKEN)
         # noinspection PyTypeChecker
@@ -130,6 +137,18 @@ class FumeTune(commands.AutoShardedBot):
             activity=discord.Game(next(self._status_items)),
         )
 
+    async def _refresh_blacklists(self) -> None:
+        self.blacklisted_users = await get_blacklisted_users(self.pool)
+        self.blacklisted_guilds = await get_blacklisted_guilds(self.pool)
+
+    @tasks.loop(minutes=5)
+    async def _refresh_blacklists_loop(self) -> None:
+        try:
+            await self._refresh_blacklists()
+
+        except Exception as e:
+            self.log.error("Failed to refresh blacklists.", exc_info=e)
+
     async def connect_nodes(self):
         nodes = list()
 
@@ -150,10 +169,12 @@ class FumeTune(commands.AutoShardedBot):
         try:
             self._update_status_items.start()
             self._change_status.start()
+            self._refresh_blacklists_loop.start()
 
         except RuntimeError:
             self._update_status_items.restart()
             self._change_status.restart()
+            self._refresh_blacklists_loop.restart()
 
         await self.connect_nodes()
 
@@ -163,7 +184,7 @@ class FumeTune(commands.AutoShardedBot):
         if message.author.bot:
             return
 
-        if message.guild and await is_blacklisted_guild(self.pool, message.guild.id):
+        if message.guild and message.guild.id in self.blacklisted_guilds:
             try:
                 await message.reply(
                     content="This server is currently blacklisted from using the FumeStop service. "
@@ -181,7 +202,7 @@ class FumeTune(commands.AutoShardedBot):
 
             return await message.guild.leave()
 
-        if await is_blacklisted_user(self.pool, message.author.id):
+        if message.author.id in self.blacklisted_users:
             await message.reply(
                 content="You are currently blacklisted from using the FumeStop service. "
                 "To appeal, join our community server:",
@@ -231,6 +252,7 @@ class FumeTune(commands.AutoShardedBot):
 
         self._update_status_items.stop()
         self._change_status.stop()
+        self._refresh_blacklists_loop.stop()
 
     @property
     def config(self):
