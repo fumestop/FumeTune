@@ -35,6 +35,102 @@ class Music(commands.Cog):
         self.bot.log.info(f"Music node {payload.node.identifier} is ready")
 
     @commands.Cog.listener()
+    async def on_wavelink_node_disconnected(
+        self, payload: wavelink.NodeDisconnectedEventPayload
+    ):
+        # A transient drop: wavelink reconnects to the same node on its own, so we
+        # only log it here. Permanent loss surfaces via on_wavelink_node_closed.
+        self.bot.log.warning(
+            f"Music node {payload.node.identifier} disconnected; "
+            f"wavelink will attempt to reconnect automatically."
+        )
+
+    @commands.Cog.listener()
+    async def on_wavelink_node_closed(
+        self, node: wavelink.Node, disconnected: list[wavelink.Player]
+    ):
+        # Best-effort failover: a closed node has already disconnected its players,
+        # so we reconnect each one on the least-loaded healthy node and resume the
+        # current track from where it left off.
+        self.bot.log.warning(
+            f"Music node {node.identifier} closed with "
+            f"{len(disconnected)} active player(s); attempting failover."
+        )
+
+        healthy = [
+            n
+            for n in wavelink.Pool.nodes.values()
+            if n.status is wavelink.NodeStatus.CONNECTED
+            and n.identifier != node.identifier
+        ]
+
+        for player in disconnected:
+            player = cast(Player, player)
+
+            ctx = getattr(player, "ctx", None)
+            channel = player.channel
+            track = player.current
+            position = player.position
+            guild_id = getattr(player.guild, "id", "?")
+
+            if not healthy or channel is None or ctx is None:
+                self.bot.log.error(
+                    f"Failover unavailable for guild {guild_id} "
+                    f"(no healthy node or missing player state)."
+                )
+                await self._safe_send(
+                    ctx,
+                    "A music node went down and no backup was available. "
+                    "Playback has stopped — please start again.",
+                )
+                continue
+
+            target = sorted(healthy, key=lambda n: len(n.players))[0]
+
+            try:
+                new_player = Player(ctx=ctx)
+                new_player.queue = player.queue
+                new_player.loop = player.loop
+                new_player.loop_queue = player.loop_queue
+                new_player.dj = player.dj
+
+                await channel.connect(cls=new_player, timeout=10.0)
+                await new_player.set_volume(player.volume)
+
+                if track is not None:
+                    await new_player.play(
+                        track, start=position, volume=player.volume
+                    )
+
+                self.bot.log.info(
+                    f"Failed over guild {guild_id} to node {target.identifier}."
+                )
+                await self._safe_send(
+                    ctx,
+                    "⚠️ A music node went down — reconnected on a "
+                    "backup node and resumed playback.",
+                )
+
+            except Exception as exc:
+                self.bot.log.error(f"Failover failed for guild {guild_id}: {exc!r}")
+                await self._safe_send(
+                    ctx,
+                    "A music node went down and reconnecting to a backup failed. "
+                    "Playback has stopped — please start again.",
+                )
+
+    @staticmethod
+    async def _safe_send(ctx: discord.Interaction | None, message: str):
+        if ctx is None:
+            return
+
+        try:
+            await ctx.channel.send(content=message)
+
+        except (discord.Forbidden, discord.HTTPException):
+            pass
+
+    @commands.Cog.listener()
     async def on_wavelink_track_exception(
         self, payload: wavelink.TrackExceptionEventPayload
     ):
@@ -205,6 +301,7 @@ class Music(commands.Cog):
         except (
             wavelink.exceptions.LavalinkException,
             wavelink.exceptions.LavalinkLoadException,
+            wavelink.exceptions.NodeException,
         ):
             return await ctx.edit_original_response(
                 content="An error occurred while loading associated tracks. "
@@ -297,6 +394,7 @@ class Music(commands.Cog):
         except (
             wavelink.exceptions.LavalinkException,
             wavelink.exceptions.LavalinkLoadException,
+            wavelink.exceptions.NodeException,
         ):
             return await ctx.edit_original_response(
                 content="An error occurred while loading associated tracks. "
