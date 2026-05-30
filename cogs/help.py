@@ -25,7 +25,7 @@ class Help(commands.Cog):
 
         embed = discord.Embed(colour=self.bot.embed_color)
         embed.title = "Command List"
-        embed.description = 'Here"s a list of available commands: '
+        embed.description = "Here's a list of available commands:"
 
         embed.add_field(
             name="General",
@@ -43,7 +43,7 @@ class Help(commands.Cog):
 
         embed.add_field(
             name="Filters",
-            value=f"`filter`, `equalizer`, `channel_mix`",
+            value=f"`filter equalizer`, `filter channel_mix`, `filter other`",
             inline=False,
         )
 
