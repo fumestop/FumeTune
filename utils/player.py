@@ -26,7 +26,6 @@ class Player(wavelink.Player):
         self.pause_votes: set = set()
         self.resume_votes: set = set()
         self.skip_votes: set = set()
-        self.seek_votes: set = set()
         self.shuffle_votes: set = set()
         self.stop_votes: set = set()
 
