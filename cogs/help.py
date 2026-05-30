@@ -36,7 +36,7 @@ class Help(commands.Cog):
         embed.add_field(
             name="Music",
             value=f"`play`, `search`, `summon`, `pause`, `resume`, `skip`, `seek`, "
-            f"`repeat`, `volume`, `now_playing`, `queue`, `remove`, `flush`, "
+            f"`repeat`, `volume`, `now`, `queue`, `remove`, `flush`, "
             f"`shuffle`, `loop`, `loop_queue`, `stop`, `disconnect`",
             inline=False,
         )

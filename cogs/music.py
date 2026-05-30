@@ -777,11 +777,11 @@ class Music(commands.Cog):
             content=f"The volume has been set to **{volume}%**!"
         )
 
-    @app_commands.command(name="now_playing")
+    @app_commands.command(name="now")
     @app_commands.check(initial_checks)
     @app_commands.checks.dynamic_cooldown(cooldown_level_0)
     @app_commands.guild_only()
-    async def _now_playing(self, ctx: discord.Interaction):
+    async def _now(self, ctx: discord.Interaction):
         """Show the currently playing song."""
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
