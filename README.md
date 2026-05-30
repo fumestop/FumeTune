@@ -1,6 +1,6 @@
-# FumeWeb
+# FumeTune
 
-[![ci/gh-actions/ruff](https://github.com/FumeStop/FumeTune/actions/workflows/ruff.yml/badge.svg)](https://github.com/FumeStop/FumeTune/actions/workflows/ruff.yml)
+[![ci/gh-actions/lint](https://github.com/FumeStop/FumeTune/actions/workflows/lint.yml/badge.svg)](https://github.com/FumeStop/FumeTune/actions/workflows/lint.yml)
 
 > Unlock the ultimate music experience for YOUR Discord community with FumeTune!
 

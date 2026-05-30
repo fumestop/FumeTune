@@ -171,5 +171,3 @@ lavalink/logs/*.gz
 logs/*.log
 logs/errors/*.log
 logs/tracks/*.log
-
-uv.lock
