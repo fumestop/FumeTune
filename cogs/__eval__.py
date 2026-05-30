@@ -7,7 +7,6 @@ import asyncio
 import inspect
 import textwrap
 import traceback
-import subprocess
 from contextlib import redirect_stdout
 
 import discord
@@ -33,7 +32,7 @@ class Evaluate(commands.Cog):
         """Evaluate a block of Python code."""
         if self.bot.owner != ctx.user:
             # noinspection PyUnresolvedReferences
-            await ctx.response.send_message(
+            return await ctx.response.send_message(
                 content="Sorry, this is an owner only command!"
             )
 
@@ -57,7 +56,7 @@ class Evaluate(commands.Cog):
         }
 
         def _cleanup_code(content):
-            content.replace("self.bot", "bot")
+            content = content.replace("self.bot", "bot")
 
             if content.startswith("```") and content.endswith("```"):
                 return "\n".join(content.split("\n")[1:-1])
@@ -92,7 +91,7 @@ class Evaluate(commands.Cog):
             exec(to_compile, env)
 
         except Exception as e:
-            await modal.interaction.edit_original_response(
+            return await modal.interaction.edit_original_response(
                 content=f"```py\n{e.__class__.__name__}: {e}\n```"
             )
 
@@ -162,7 +161,7 @@ class Evaluate(commands.Cog):
         """Execute a shell command."""
         if self.bot.owner != ctx.user:
             # noinspection PyUnresolvedReferences
-            await ctx.response.send_message(
+            return await ctx.response.send_message(
                 content="Sorry, this is an owner only command!"
             )
 
@@ -173,17 +172,24 @@ class Evaluate(commands.Cog):
         await ctx.response.send_modal(modal)
         await modal.wait()
 
-        process = subprocess.run(
+        process = await asyncio.create_subprocess_shell(
             modal.sh_commands.value,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=300,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
 
-        stdout_value = process.stdout.decode("utf-8") + process.stderr.decode(
-            "utf-8"
-        )
+        try:
+            stdout, stderr = await asyncio.wait_for(
+                process.communicate(), timeout=300
+            )
+
+        except asyncio.TimeoutError:
+            process.kill()
+            return await modal.interaction.edit_original_response(
+                content="The command timed out after 300 seconds."
+            )
+
+        stdout_value = stdout.decode("utf-8") + stderr.decode("utf-8")
         stdout_value = "\n".join(stdout_value.split("\n")[-25:])
 
         await modal.interaction.edit_original_response(
