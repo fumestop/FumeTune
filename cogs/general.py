@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import math
-from datetime import datetime
 
 import discord
 from discord import app_commands
@@ -33,11 +32,11 @@ class General(commands.Cog):
 
         embed.add_field(name="API latency (Heartbeat)", value=f"`{int(ms)} ms`")
 
-        t1 = datetime.utcnow().strftime("%f")
+        t1 = discord.utils.utcnow().strftime("%f")
 
         await ctx.edit_original_response(embed=embed)
 
-        t2 = datetime.utcnow().strftime("%f")
+        t2 = discord.utils.utcnow().strftime("%f")
         diff = int(math.fabs((int(t2) - int(t1)) / 1000))
 
         embed.add_field(name="Bot latency (Round-trip)", value=f"`{diff} ms`")

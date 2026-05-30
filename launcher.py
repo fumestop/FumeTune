@@ -34,7 +34,6 @@ async def create_pool() -> aiomysql.Pool:
         password=config.DB_PASSWORD,
         db=config.DB_NAME,
         autocommit=True,
-        loop=asyncio.get_event_loop(),
     )
 
 
@@ -53,17 +52,27 @@ def setup_logging():
     log = logging.getLogger()
 
     try:
-        handler = logging.FileHandler(
+        # Console handler (coloured automatically when attached to a TTY).
+        stream_handler = logging.StreamHandler()
+        discord.utils.setup_logging(handler=stream_handler, level=logging.INFO)
+
+        # File handler, mirroring the console with the same format discord uses.
+        dt_fmt = "%Y-%m-%d %H:%M:%S"
+        formatter = logging.Formatter(
+            "[{asctime}] [{levelname:<8}] {name}: {message}", dt_fmt, style="{"
+        )
+        file_handler = logging.FileHandler(
             filename=f"logs/fumetune-{datetime.now().strftime('%Y-%m-%d~%H-%M-%S')}.log",
             encoding="utf-8",
             mode="w",
         )
-
-        discord.utils.setup_logging(handler=handler)
+        file_handler.setFormatter(formatter)
+        log.addHandler(file_handler)
 
         logging.getLogger("discord").setLevel(logging.INFO)
         logging.getLogger("discord.http").setLevel(logging.WARNING)
         logging.getLogger("discord.state").addFilter(RemoveNoise())
+        logging.getLogger("wavelink").setLevel(logging.INFO)
 
         log.setLevel(logging.INFO)
 
