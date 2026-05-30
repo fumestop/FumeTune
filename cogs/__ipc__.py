@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import discord
 from discord.ext import commands
 from discord.ext.ipc import Server
 from discord.ext.ipc.objects import ClientPayload
@@ -64,7 +65,14 @@ class IPC(commands.Cog):
         guilds = dict()
 
         for guild in user.mutual_guilds:
-            member = await guild.fetch_member(user.id)
+            member = guild.get_member(user.id)
+
+            if member is None:
+                try:
+                    member = await guild.fetch_member(user.id)
+
+                except discord.HTTPException:
+                    continue
 
             guilds[guild.id] = {
                 "name": guild.name,

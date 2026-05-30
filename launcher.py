@@ -91,7 +91,7 @@ async def run_bot():
     try:
         pool = await create_pool()
 
-    except pymysql.err.OperationalError:
+    except pymysql.err.Error:
         click.echo("Could not set up MySQL. Exiting.", file=sys.stderr)
         return log.exception("Could not set up MySQL. Exiting...")
 

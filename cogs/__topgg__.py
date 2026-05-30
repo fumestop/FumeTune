@@ -27,6 +27,14 @@ class TopGG(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        token = self.bot.config.TOPGG_TOKEN
+
+        if not token or token == "topgg_token":
+            self.bot.log.info(
+                "Top.gg token is not configured; skipping stat posting."
+            )
+            return
+
         self._update_stats.start()
         self.bot.log.info("Top.gg webhook is ready")
 
