@@ -227,12 +227,12 @@ class Music(commands.Cog):
             return
 
         if not player.channel or not player.ctx:
-            await player.teardown()
+            return await player.teardown()
 
         channel = player.channel
 
         if len(channel.members) == 1:
-            await player.teardown()
+            return await player.teardown()
 
         if member == player.dj and after.channel is None:
             for m in channel.members:
@@ -245,6 +245,50 @@ class Music(commands.Cog):
 
         elif after.channel == channel and player.dj not in channel.members:
             player.dj = member
+
+    async def _ensure_voice(self, ctx: discord.Interaction) -> bool:
+        """Connect to the invoker's voice channel unless already connected.
+
+        Returns ``True`` when the bot is connected and ready, or ``False`` after
+        sending an error response (missing permissions, full channel, or a
+        connection timeout).
+        """
+        channel = ctx.user.voice.channel
+
+        if ctx.guild.me.voice and ctx.guild.me.voice.channel == channel:
+            return True
+
+        if (
+            not channel.permissions_for(ctx.guild.me).connect
+            or not channel.permissions_for(ctx.guild.me).speak
+        ):
+            await ctx.edit_original_response(
+                content="Sorry, I do not have permissions to `Connect` and/or `Speak` in that voice channel."
+            )
+            return False
+
+        if channel.user_limit and len(channel.members) == channel.user_limit:
+            await ctx.edit_original_response(
+                content="Sorry, that voice channel is full."
+            )
+            return False
+
+        if not ctx.channel.permissions_for(ctx.guild.me).send_messages:
+            await ctx.edit_original_response(
+                content="Sorry, I do not have permissions to send messages in this channel."
+            )
+            return False
+
+        try:
+            await channel.connect(cls=Player(ctx=ctx), timeout=10.0)
+
+        except wavelink.exceptions.ChannelTimeoutException:
+            await ctx.edit_original_response(
+                content="I was unable to connect to that voice channel."
+            )
+            return False
+
+        return True
 
     @app_commands.command(name="play")
     @app_commands.check(initial_checks)
@@ -262,36 +306,8 @@ class Music(commands.Cog):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        channel = ctx.user.voice.channel
-
-        if not ctx.guild.me.voice or ctx.guild.me.voice.channel != channel:
-            if (
-                not channel.permissions_for(ctx.guild.me).connect
-                or not channel.permissions_for(ctx.guild.me).speak
-            ):
-                return await ctx.edit_original_response(
-                    content="Sorry, I do not have permissions to `Connect` and/or `Speak` in that voice channel."
-                )
-
-            if channel.user_limit and len(channel.members) == channel.user_limit:
-                return await ctx.edit_original_response(
-                    content="Sorry, that voice channel is full."
-                )
-
-            if not ctx.channel.permissions_for(ctx.guild.me).send_messages:
-                return await ctx.edit_original_response(
-                    content="Sorry, I do not have permissions to send messages in this channel."
-                )
-
-            pl = Player(ctx=ctx)
-
-            try:
-                _: Player = await channel.connect(cls=pl, timeout=10.0)
-
-            except wavelink.exceptions.ChannelTimeoutException:
-                return await ctx.edit_original_response(
-                    content="I was unable to connect to that voice channel."
-                )
+        if not await self._ensure_voice(ctx):
+            return
 
         player: Player = cast(Player, ctx.guild.voice_client)
 
@@ -355,36 +371,8 @@ class Music(commands.Cog):
         # noinspection PyUnresolvedReferences
         await ctx.response.defer(thinking=True)
 
-        channel = ctx.user.voice.channel
-
-        if not ctx.guild.me.voice or ctx.guild.me.voice.channel != channel:
-            if (
-                not channel.permissions_for(ctx.guild.me).connect
-                or not channel.permissions_for(ctx.guild.me).speak
-            ):
-                return await ctx.edit_original_response(
-                    content="Sorry, I do not have permissions to `Connect` and/or `Speak` in that voice channel."
-                )
-
-            if channel.user_limit and len(channel.members) == channel.user_limit:
-                return await ctx.edit_original_response(
-                    content="Sorry, that voice channel is full."
-                )
-
-            if not ctx.channel.permissions_for(ctx.guild.me).send_messages:
-                return await ctx.edit_original_response(
-                    content="Sorry, I do not have permissions to send messages in this channel."
-                )
-
-            pl = Player(ctx=ctx)
-
-            try:
-                _: Player = await channel.connect(cls=pl, timeout=10.0)
-
-            except wavelink.exceptions.ChannelTimeoutException:
-                return await ctx.edit_original_response(
-                    content="I was unable to connect to that voice channel."
-                )
+        if not await self._ensure_voice(ctx):
+            return
 
         embed = discord.Embed(color=self.bot.embed_color)
 
