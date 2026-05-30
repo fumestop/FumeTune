@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional, cast
 import discord
 from discord import ui
 
+from .tools import MAX_TRACK_LENGTH_MS
 from .player import Player
 
 if TYPE_CHECKING:
@@ -74,7 +75,7 @@ class PlaylistConfirm(ui.View):
                 view=None,
             )
 
-        if any(track.length > 24 * 60 * 60 * 1000 for track in self.playlist.tracks):
+        if any(track.length > MAX_TRACK_LENGTH_MS for track in self.playlist.tracks):
             return await ctx.edit_original_response(
                 content="Sorry, one or more songs are too long to be played **(>24 hours)**."
             )

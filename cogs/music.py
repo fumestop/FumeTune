@@ -14,7 +14,7 @@ from discord.ext import commands
 from discord.ext.menus.views import ViewMenuPages
 
 from utils.cd import cooldown_level_0
-from utils.tools import parse_duration
+from utils.tools import MAX_TRACK_LENGTH_MS, parse_duration
 from utils.views import TrackConfirm, PlaylistConfirm
 from utils.checks import initial_checks
 from utils.player import Player
@@ -330,7 +330,7 @@ class Music(commands.Cog):
             )
 
         elif isinstance(tracks, wavelink.Playlist):
-            if any(track.length > 24 * 60 * 60 * 1000 for track in tracks.tracks):
+            if any(track.length > MAX_TRACK_LENGTH_MS for track in tracks.tracks):
                 return await ctx.edit_original_response(
                     content="Sorry, one or more songs are too long to be played **(>24 hours)**."
                 )
@@ -342,7 +342,7 @@ class Music(commands.Cog):
         else:
             track: wavelink.Playable = tracks[0]
 
-            if track.length > 24 * 60 * 60 * 1000:
+            if track.length > MAX_TRACK_LENGTH_MS:
                 return await ctx.edit_original_response(
                     content="Sorry, the song is too long to be played **(>24 hours)**."
                 )

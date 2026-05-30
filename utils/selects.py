@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional, cast
 import discord
 from discord import ui
 
+from .tools import MAX_TRACK_LENGTH_MS
 from .player import Player
 
 if TYPE_CHECKING:
@@ -49,7 +50,7 @@ class TrackSelect(ui.Select):
 
         track = self.tracks[int(self.values[0]) - 1]
 
-        if track.length > 24 * 60 * 60 * 1000:
+        if track.length > MAX_TRACK_LENGTH_MS:
             return await self.ctx.edit_original_response(
                 content="The track is too long to be played **(>24 hours)**.",
                 embed=None,
