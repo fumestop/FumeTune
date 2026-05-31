@@ -10,11 +10,11 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "aiomysql==0.3.2",
-    "better-ipc",
     "click==8.4.1",
     "discord-ext-menus",
     "discord-ext-menus-views",
     "discord-py[speed]==2.7.1",
+    "fumestop-ext-ipc==1.0.0",
     "lyricsgenius==3.12.2",
     "topggpy==1.4.0",
     "wavelink==3.5.2",
@@ -32,7 +32,6 @@ dev = [
 ]
 
 [tool.uv.sources]
-better-ipc = { git = "https://github.com/MiroslavRosenov/better-ipc", rev = "efb145d9dabc0a90e4c6e32be08bd03ae4257249" }
 discord-ext-menus = { git = "https://github.com/Rapptz/discord-ext-menus" }
 discord-ext-menus-views = { git = "https://github.com/FumeStop/discord-ext-menus-views" }
 

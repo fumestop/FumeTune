@@ -174,14 +174,6 @@ wheels = [
 ]
 
 [[package]]
-name = "better-ipc"
-version = "2.0.3"
-source = { git = "https://github.com/MiroslavRosenov/better-ipc?rev=efb145d9dabc0a90e4c6e32be08bd03ae4257249#efb145d9dabc0a90e4c6e32be08bd03ae4257249" }
-dependencies = [
-    { name = "websockets" },
-]
-
-[[package]]
 name = "brotli"
 version = "1.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -439,16 +431,29 @@ wheels = [
 ]
 
 [[package]]
+name = "fumestop-ext-ipc"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "discord-py" },
+    { name = "websockets" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f2/55/6a23c1af76a0c7198332b7444967f51e3d9665a084b848e2aa5fe66ea0a5/fumestop_ext_ipc-1.0.0.tar.gz", hash = "sha256:81865628f02c8bb1a7046942636dffb0cfed4fe65484d9f67fd6d893070e2ce1", size = 140034, upload-time = "2026-05-31T14:35:25.026Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b0/92/e3d94989f3eca427fefa6c97b43b68a220e49ecc964b4ade7e7e952ce430/fumestop_ext_ipc-1.0.0-py3-none-any.whl", hash = "sha256:a945a0ff261eac5674a4689eec8f0bcab2e9b9fed0ad47e80de4dbd248e7a3a4", size = 20435, upload-time = "2026-05-31T14:35:26.114Z" },
+]
+
+[[package]]
 name = "fumetune"
 version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "aiomysql" },
-    { name = "better-ipc" },
     { name = "click" },
     { name = "discord-ext-menus" },
     { name = "discord-ext-menus-views" },
     { name = "discord-py", extra = ["speed"] },
+    { name = "fumestop-ext-ipc" },
     { name = "lyricsgenius" },
     { name = "topggpy" },
     { name = "wavelink" },
@@ -468,11 +473,11 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiomysql", specifier = "==0.3.2" },
-    { name = "better-ipc", git = "https://github.com/MiroslavRosenov/better-ipc?rev=efb145d9dabc0a90e4c6e32be08bd03ae4257249" },
     { name = "click", specifier = "==8.4.1" },
     { name = "discord-ext-menus", git = "https://github.com/Rapptz/discord-ext-menus" },
     { name = "discord-ext-menus-views", git = "https://github.com/FumeStop/discord-ext-menus-views" },
     { name = "discord-py", extras = ["speed"], specifier = "==2.7.1" },
+    { name = "fumestop-ext-ipc", specifier = "==1.0.0" },
     { name = "lyricsgenius", specifier = "==3.12.2" },
     { name = "topggpy", specifier = "==1.4.0" },
     { name = "uvloop", marker = "extra == 'speed'", specifier = "==0.22.1" },
