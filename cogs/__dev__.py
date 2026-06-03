@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from config import COMMUNITY_GUILD_ID
+from utils.config import Config
 
 if TYPE_CHECKING:
     from bot import FumeTune
@@ -17,7 +17,7 @@ class Dev(commands.Cog):
         self.bot: FumeTune = bot
 
     @app_commands.command(name="load")
-    @app_commands.guilds(COMMUNITY_GUILD_ID)
+    @app_commands.guilds(Config.COMMUNITY_GUILD_ID)
     async def _load(self, ctx: discord.Interaction, extension: str):
         """Load an extension.
 
@@ -51,7 +51,7 @@ class Dev(commands.Cog):
         await ctx.edit_original_response(content="The extension has been loaded.")
 
     @app_commands.command(name="unload")
-    @app_commands.guilds(COMMUNITY_GUILD_ID)
+    @app_commands.guilds(Config.COMMUNITY_GUILD_ID)
     async def _unload(self, ctx: discord.Interaction, extension: str):
         """Unload an extension.
 
@@ -80,7 +80,7 @@ class Dev(commands.Cog):
         await ctx.edit_original_response(content="The extension has been unloaded.")
 
     @app_commands.command(name="reload")
-    @app_commands.guilds(COMMUNITY_GUILD_ID)
+    @app_commands.guilds(Config.COMMUNITY_GUILD_ID)
     async def _reload(self, ctx: discord.Interaction, extension: str):
         """Reload an extension.
 
@@ -109,7 +109,7 @@ class Dev(commands.Cog):
         await ctx.edit_original_response(content="The extension has been reloaded.")
 
     @app_commands.command(name="sync")
-    @app_commands.guilds(COMMUNITY_GUILD_ID)
+    @app_commands.guilds(Config.COMMUNITY_GUILD_ID)
     async def _sync(self, ctx: discord.Interaction):
         """Sync the global and guild app commands."""
         # noinspection PyUnresolvedReferences

@@ -13,9 +13,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from utils.config import Config
 from utils.modals import EvalModal, ExecModal
-
-from config import COMMUNITY_GUILD_ID
 
 if TYPE_CHECKING:
     from bot import FumeTune
@@ -27,7 +26,7 @@ class Evaluate(commands.Cog):
 
     # noinspection PyBroadException
     @app_commands.command(name="eval")
-    @app_commands.guilds(COMMUNITY_GUILD_ID)
+    @app_commands.guilds(Config.COMMUNITY_GUILD_ID)
     async def _eval(self, ctx: discord.Interaction):
         """Evaluate a block of Python code."""
         if self.bot.owner != ctx.user:
@@ -156,7 +155,7 @@ class Evaluate(commands.Cog):
                         )
 
     @app_commands.command(name="exec")
-    @app_commands.guilds(COMMUNITY_GUILD_ID)
+    @app_commands.guilds(Config.COMMUNITY_GUILD_ID)
     async def _exec(self, ctx: discord.Interaction):
         """Execute a shell command."""
         if self.bot.owner != ctx.user:

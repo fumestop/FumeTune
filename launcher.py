@@ -13,8 +13,7 @@ import aiomysql
 import discord
 
 from bot import FumeTune
-
-import config
+from utils.config import Config
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -28,11 +27,11 @@ else:
 
 async def create_pool() -> aiomysql.Pool:
     return await aiomysql.create_pool(
-        host=config.DB_HOST,
-        port=config.DB_PORT,
-        user=config.DB_USER,
-        password=config.DB_PASSWORD,
-        db=config.DB_NAME,
+        host=Config.DB_HOST,
+        port=Config.DB_PORT,
+        user=Config.DB_USER,
+        password=Config.DB_PASSWORD,
+        db=Config.DB_NAME,
         autocommit=True,
     )
 

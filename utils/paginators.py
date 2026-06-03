@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Any, Optional, cast
 import discord
 from discord.ext.menus import ListPageSource
 
+from utils.config import Config
+
 from .tools import parse_duration
 from .player import Player
-
-import config
 
 if TYPE_CHECKING:
     from discord.ext.menus import Menu
@@ -26,7 +26,7 @@ class QueuePaginatorSource(ListPageSource):
         player: Player = cast(Player, self.ctx.guild.voice_client)
         channel = player.channel
 
-        embed = discord.Embed(color=config.EMBED_COLOR)
+        embed = discord.Embed(color=Config.EMBED_COLOR)
         embed.title = f"Queue | {channel.name}"
         embed.description = "\n".join(
             f"`{_index}`. **[{_track.title}]({_track.uri})** "

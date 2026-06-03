@@ -455,6 +455,7 @@ dependencies = [
     { name = "discord-py", extra = ["speed"] },
     { name = "fumestop-ext-ipc" },
     { name = "lyricsgenius" },
+    { name = "python-dotenv" },
     { name = "topggpy" },
     { name = "wavelink" },
 ]
@@ -479,6 +480,7 @@ requires-dist = [
     { name = "discord-py", extras = ["speed"], specifier = "==2.7.1" },
     { name = "fumestop-ext-ipc", specifier = "==1.0.0" },
     { name = "lyricsgenius", specifier = "==3.12.2" },
+    { name = "python-dotenv", specifier = "==1.2.2" },
     { name = "topggpy", specifier = "==1.4.0" },
     { name = "uvloop", marker = "extra == 'speed'", specifier = "==0.22.1" },
     { name = "wavelink", specifier = "==3.5.2" },
@@ -762,6 +764,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/b3/8f/ce59b5e5ed4ce8512f879ff1fa5ab699d211ae2495f1adaa5fbba2a1eada/pymysql-1.1.1.tar.gz", hash = "sha256:e127611aaf2b417403c60bf4dc570124aeb4a57f5f37b8e95ae399a42f904cd0", size = 47678, upload-time = "2024-05-21T11:03:43.722Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0c/94/e4181a1f6286f545507528c78016e00065ea913276888db2262507693ce5/PyMySQL-1.1.1-py3-none-any.whl", hash = "sha256:4de15da4c61dc132f4fb9ab763063e693d521a80fd0e87943b9a453dd4c19d6c", size = 44972, upload-time = "2024-05-21T11:03:41.216Z" },
+]
+
+[[package]]
+name = "python-dotenv"
+version = "1.2.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/82/ed/0301aeeac3e5353ef3d94b6ec08bbcabd04a72018415dcb29e588514bba8/python_dotenv-1.2.2.tar.gz", hash = "sha256:2c371a91fbd7ba082c2c1dc1f8bf89ca22564a087c2c287cd9b662adde799cf3", size = 50135, upload-time = "2026-03-01T16:00:26.196Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0b/d7/1959b9648791274998a9c3526f6d0ec8fd2233e4d4acce81bbae76b44b2a/python_dotenv-1.2.2-py3-none-any.whl", hash = "sha256:1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a", size = 22101, upload-time = "2026-03-01T16:00:25.09Z" },
 ]
 
 [[package]]

@@ -160,7 +160,6 @@ cython_debug/
 .idea/
 
 # FumeTune
-config.py
 
 lavalink/application.yml
 lavalink/Lavalink.jar
